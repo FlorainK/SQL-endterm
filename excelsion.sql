@@ -1,0 +1,503 @@
+CREATE DATABASE excelsior;
+
+USE excelsior;
+
+CREATE TABLE collectables(
+    collectable_id INT NOT NULL AUTO_INCREMENT,
+    title VARCHAR(255) NOT NULL,
+    publisher VARCHAR(255) NOT NULL,
+    PRIMARY KEY(collectable_id)
+);
+
+CREATE TABLE storylines(
+    storyline_id INT NOT NULL AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL,
+    PRIMARY KEY(storyline_id)
+);
+
+CREATE TABLE storyline_collectables(
+    storyline_collectable_id INT NOT NULL AUTO_INCREMENT,
+    storyline_id INT NOT NULL,
+    collectable_id INT NOT NULL,
+    PRIMARY KEY(storyline_collectable_id),
+    FOREIGN KEY(storyline_id) REFERENCES storylines(storyline_id),
+    FOREIGN KEY(collectable_id) REFERENCES collectables(collectable_id)
+);
+
+CREATE TABLE comics(
+    comic_id INT NOT NULL AUTO_INCREMENT,
+    collectable_id INT NOT NULL,
+    issue_number INT NOT NULL,
+    PRIMARY KEY(comic_id),
+    FOREIGN KEY(collectable_id) REFERENCES collectables(collectable_id)
+);
+
+CREATE TABLE creators(
+    creator_id INT NOT NULL AUTO_INCREMENT,
+    first_name VARCHAR(255) NOT NULL,
+    last_name VARCHAR(255) NOT NULL,
+    PRIMARY KEY(creator_id)
+);
+
+CREATE TABLE feature_work(
+    feature_work_id INT NOT NULL AUTO_INCREMENT,
+    creator_id INT NOT NULL,
+    collectable_id INT NOT NULL,
+    job VARCHAR(255) NOT NULL,
+    PRIMARY KEY(feature_work_id),
+    FOREIGN KEY(creator_id) REFERENCES creators(creator_id),
+    FOREIGN KEY(collectable_id) REFERENCES collectables(collectable_id)
+);
+
+CREATE TABLE characters(
+    character_id INT NOT NULL AUTO_INCREMENT,
+    character_name VARCHAR(255) NOT NULL,
+    character_profession VARCHAR(255) NOT NULL,
+    PRIMARY KEY(character_id)
+);
+
+CREATE TABLE character_appearings(
+    character_appearing_id INT NOT NULL AUTO_INCREMENT,
+    character_id INT NOT NULL,
+    collectable_id INT NOT NULL,
+    PRIMARY KEY(character_appearing_id),
+    FOREIGN KEY(character_id) REFERENCES characters(character_id),
+    FOREIGN KEY(collectable_id) REFERENCES collectables(collectable_id)
+);
+CREATE TABLE condition_descriptions(
+    textual_condition VARCHAR(255) NOT NULL,
+    condition_description TEXT NOT NULL,
+    PRIMARY KEY(textual_condition)
+);
+
+CREATE TABLE conditions(
+    condition_id DECIMAL(3,1) NOT NULL,
+    textual_condition VARCHAR(5) NOT NULL,
+    PRIMARY KEY(condition_id),
+    FOREIGN KEY(textual_condition) REFERENCES condition_descriptions(textual_condition)
+);
+
+
+CREATE TABLE stock(
+    stock_id INT NOT NULL AUTO_INCREMENT,
+    collectable_id INT NOT NULL,
+    condition_id DECIMAL(3,1) NOT NULL,
+    edition INT NOT NULL,
+    buying_price DECIMAL(10,2) NOT NULL,
+    selling_price DECIMAL(10,2) NOT NULL,
+    comment TEXT,
+    in_stock BOOLEAN NOT NULL,
+    PRIMARY KEY(stock_id),
+    FOREIGN KEY(collectable_id) REFERENCES collectables(collectable_id),
+    FOREIGN KEY(condition_id) REFERENCES conditions(condition_id)
+);
+
+CREATE TABLE addresses(
+    address_id INT NOT NULL AUTO_INCREMENT,
+    street VARCHAR(255) NOT NULL,
+    city VARCHAR(255) NOT NULL,
+    state VARCHAR(255) NOT NULL,
+    zip_code VARCHAR(9) NOT NULL,
+    PRIMARY KEY(address_id)
+);
+
+CREATE TABLE customers(
+    customer_id INT NOT NULL AUTO_INCREMENT,
+    first_name VARCHAR(255) NOT NULL,
+    last_name VARCHAR(255) NOT NULL,
+    address_id INT NOT NULL,
+    dob DATE NOT NULL,
+    PRIMARY KEY(customer_id),
+    FOREIGN KEY(address_id) REFERENCES addresses(address_id)
+);
+
+CREATE TABLE shopping_cart(
+    shopping_cart_id INT NOT NULL AUTO_INCREMENT,
+    customer_id INT NOT NULL,
+    collectable_id INT NOT NULL,
+    PRIMARY KEY(shopping_cart_id),
+    FOREIGN KEY(customer_id) REFERENCES customers(customer_id),
+    FOREIGN KEY(collectable_id) REFERENCES collectables(collectable_id)
+);
+
+CREATE TABLE sold_items(
+    sold_item_id INT NOT NULL AUTO_INCREMENT,
+    customer_id INT NOT NULL,
+    stock_id INT NOT NULL,
+    PRIMARY KEY(sold_item_id),
+    FOREIGN KEY(customer_id) REFERENCES customers(customer_id),
+    FOREIGN KEY(stock_id) REFERENCES stock(stock_id)
+);
+
+-- From here on dummy data
+
+-- conditions
+INSERT INTO condition_descriptions(textual_condition, condition_description) VALUES
+    ("MT", "Mint:Near perfect in every way. Only the most subtle bindery or printing defects are allowed. Cover is flat with no surface wear. Cover inks are bright with high reflectivity and minimal fading. Corners are cut square and sharp. Staples are generally centered, clean with no rust. Cover is generally well centered and firmly secured to interior pages. Paper is supple and fresh. Spine is tight and flat."),
+    ("NM/MT", "Near-Mint/Mint: A comic book that has enough positive qualities to make it better than a NM, but has enough detracting qualities to keep it from being a MT 9.9."),
+    ("NM", "Near-Mint:Nearly perfect with only minor imperfections allowed. This grade should have no corner of impact creases, stress marks should be almost invisible, and bindery tears must be less than 1/16 inch. A couple of very tiny color flecks, or a combination of the above that keeps the book from being perfect, where the overall eye appeal is less than Mint drops the book into this grade. Only the most subtle binging and/or printing defects allowed. Cover is flat with no surface wear. Cover inks are bright with high reflectivity and minimum of fading. Corners are cut square and sharp with ever so slight blunting permitted. Staples are generally centered, clean with no rust. Cover is well centered and firmly secured to interior pages. Paper is supple and like new. Spine is tight and flat."),
+    ("VF/NM", "Very-Fine/Near-Mint: A cominc book that has enough positive qualities to make it better than VF, but has enough detracting qualities to keep it from being a NM."),
+    ("VF", "An excellent copy with outstanding eye appeal. Sharp, bright and clean with supple pages. Cover is relatively flat with almost no surface wear. Cover inks are generally bright with moderate to high reflectivity. Staples may show some discoloration. Spine may have a couple of almost insignificant transverse stress lines and is almost completely flat. A barely unnoticeable ¼ inch crease is acceptable, if color is not broken. Pages and covers can be yellowish/tannish (at the least, but no brown and will usually be off-white to white)."),
+    ("FN/VF", "Fine/Very-Fine: A cominc book that has enough positive qualities to make it better than F, but has enough detracting qualities to keep it from being a VF."),
+    ("FN", "Fine: An above-average copy that shows minor wear but is still relatively flat and clean with no significant creasing or other serious defects. Eye appeal is somewhat reduced because of slight surface wear and possibly a small defect such as a few slight cross stress marks on spine or a very slight spine split (1/4”). A Fine condition comic book appears to have been read a few times and has been handled with moderate care. Compared to a VF, cover inks are beginning to show a significant reduction in reflectivity, but it is still a highly collectible and desirable book. Pages and interior covers may be tan, but pages must still be fairly supple with no signs of brittleness."),
+    ("VG/FG", "Very Good/Fine: A cominc book that has enough positive qualities to make it better than VG, but has enough detracting qualities to keep it from being a F."),
+    ("VG", "Very Good: The average used comic book. A comic in this grade shows some wear, can have a reading or center crease or a moderately rolled spine, but has not accumulated enough total defects to reduce eye appeal to the point that it is not a desirable copy. Some discoloration, fading and even minor soiling is allowed. As much as a ¼’ triangle can be missing out of the corner or edge. A missing square piece (1/8” by 1/8”) is also acceptable. Store stamps, name stamps, arrival dates, initials, etc. have no effect on this grade. Cover and interior pages can have some minor tears and folds and the centerfold may be detached at one staple. The cover may also be loose, but not completely detached. Common bindery and printing defects do not affect grade. Pages and inside covers may be brown but not brittle. Tape should never be used for comic book repair; however, many VG condition comics have minor tape repair."),
+    ("GD/VG", "Good/Very Good: A cominc book that has enough positive qualities to make it better than G, but has enough detracting qualities to keep it from being a VG."),
+    ("GD", "Good: A copy in this grade has all pages and covers, although There may be small pieces missing inside; the largest piece allowed from front or back cover is a ½” triangle or square ¼” by ¼”. Books in this grade are commonly creased, scuffed, abraded, soiled and may have as much as a 2” spine split, but are still completely readable. Often, paper quality is low but not brittle. Cover reflectivity is low, and in some cases, completely absent. This grade can have a moderate accumulation of defects, but still maintains its basic structural integrity."),
+    ("FR/GD", "Fair/Good: A cominc book that has enough positive qualities to make it better than FR, but has enough detracting qualities to keep it from being a G."),
+    ("FR", "Fair: A copy in this grade is usually soiled, ragged, and possibly unattractive. Creases, tears and/or folds are prevalent. Spine may be split up to 2/3rds its entire length. Staples may be gone. Up to 1/10th of the front cover may be missing. These books are readable, although soiling, staining, tears, markings or chunks missing may moderately interfere with reading the complete story. Some collectors consider this the lowest collectible grade because comic books in lesser condition are usually defaced and/or brittle. Very often paper quality is low and may have slight brittleness around the edges, but not in the central portions of the pages. Comic books in this grade may have a clipped coupon, so long as it is noted along side of the nomenclature, i.e.: “Fair (1.0) Coupon Clipped.” Valued at 50-70% of good."),
+    ("PR/FR", "Poor/Fair: A cominc book that has enough positive qualities to make it better than PR, but has enough detracting qualities to keep it from being a FR."),
+    ("PR", "Poor: Most comic books in this grade have been sufficiently degraded to the point that copies may have extremely severe stains, missing staples, brittleness, mildew or moderate to heavy cover abrasion to the point that some cover inks are indistinct/absent. Comic books in this grade can have small chunks missing and pieces out of pages. They may have been defaced with paints, varnishes, glues, oil, indelible markers or dyes. Covers may be split the entire length of the book, but both halves must be present and basically still there with some chunks missing. A page(s) may be missing as long as it is noted along side of the nomenclature; i.e.: “POOR (0.5) 2nd Page Missing.” Value depends on extent of defects, but would average about 1/3 of GOOD.");
+
+
+INSERT INTO conditions(condition_id, textual_condition) VALUES
+    (0.0, "PR"),
+    (0.1, "PR"),
+    (0.2, "PR"),
+    (0.3, "PR"),
+    (0.4, "PR"),
+    (0.5, "PR"),
+    (0.6, "PR/FR"),
+    (0.7, "PR/FR"),
+    (0.8, "PR/FR"),
+    (0.9, "PR/FR"),
+    (1.0, "FR"),
+    (1.1, "FR/GD"),
+    (1.2, "FR/GD"),
+    (1.3, "FR/GD"),
+    (1.4, "FR/GD"),
+    (1.5, "FR/GD"),
+    (1.6, "FR/GD"),
+    (1.7, "FR/GD"),
+    (1.8, "FR/GD"),
+    (1.9, "FR/GD"),
+    (2.0, "FR/GD"),
+    (2.1, "FR/GD"),
+    (2.2, "GD"),
+    (2.3, "GD/VG"),
+    (2.4, "GD/VG"),
+    (2.5, "GD/VG"),
+    (2.6, "GD/VG"),
+    (2.7, "GD/VG"),
+    (2.8, "GD/VG"),
+    (2.9, "GD/VG"),
+    (3.0, "GD/VG"),
+    (3.1, "GD/VG"),
+    (3.2, "GD/VG"),
+    (3.3, "GD/VG"),
+    (3.4, "GD/VG"),
+    (3.5, "GD/VG"),
+    (3.6, "GD/VG"),
+    (3.7, "GD/VG"),
+    (3.8, "GD/VG"),
+    (3.9, "GD/VG"),
+    (4.0, "VG"),
+    (4.1, "VG/FG"),
+    (4.2, "VG/FG"),
+    (4.3, "VG/FG"),
+    (4.4, "VG/FG"),
+    (4.5, "VG/FG"),
+    (4.6, "VG/FG"),
+    (4.7, "VG/FG"),
+    (4.8, "VG/FG"),
+    (4.9, "VG/FG"),
+    (5.0, "VG/FG"),
+    (5.1, "VG/FG"),
+    (5.2, "VG/FG"),
+    (5.3, "VG/FG"),
+    (5.4, "VG/FG"),
+    (5.5, "VG/FG"),
+    (5.6, "VG/FG"),
+    (5.7, "VG/FG"),
+    (5.8, "VG/FG"),
+    (5.9, "VG/FG"),
+    (6.0, "FN"),
+    (6.1, "FN/VF"),
+    (6.2, "FN/VF"),
+    (6.3, "FN/VF"),
+    (6.4, "FN/VF"),
+    (6.5, "FN/VF"),
+    (6.6, "FN/VF"),
+    (6.7, "FN/VF"),
+    (6.8, "FN/VF"),
+    (6.9, "FN/VF"),
+    (7.0, "FN/VF"),
+    (7.1, "FN/VF"),
+    (7.2, "FN/VF"),
+    (7.3, "FN/VF"),
+    (7.4, "FN/VF"),
+    (7.5, "FN/VF"),
+    (7.6, "FN/VF"),
+    (7.7, "FN/VF"),
+    (7.8, "FN/VF"),
+    (7.9, "FN/VF"),
+    (8.0, "VF"),
+    (8.1, "VF/NM"),
+    (8.2, "VF/NM"),
+    (8.3, "VF/NM"),
+    (8.4, "VF/NM"),
+    (8.5, "VF/NM"),
+    (8.6, "VF/NM"),
+    (8.7, "VF/NM"),
+    (8.8, "VF/NM"),
+    (8.9, "VF/NM"),
+    (9.0, "VF/NM"),
+    (9.1, "VF/NM"),
+    (9.2, "VF/NM"),
+    (9.3, "VF/NM"),
+    (9.4, "VF/NM"),
+    (9.5, "NM"),
+    (9.6, "NM/MT"),
+    (9.7, "NM/MT"),
+    (9.8, "NM/MT"),
+    (9.9, "NM/MT"),
+    (10.0, "MT");
+
+
+-- Spider Man
+INSERT INTO collectables(title, publisher) VALUES
+    ("Amazing Spider-Man (1999)", "Marvel"), -- 1
+    ("Amazing Spider-Man (1999)", "Marvel"), -- 2
+    ("Amazing Spider-Man (1999)", "Marvel"), -- 3
+    ("Amazing Spider-Man (1999)", "Marvel"), -- 4
+    ("Amazing Spider-Man (1999)", "Marvel"), -- 5
+
+    -- some xmen comics
+    ("X-Men (1991)", "Marvel"), -- 6
+    ("X-Men (1991)", "Marvel"), -- 7
+    ("X-Men (1991)", "Marvel"), -- 8
+    ("X-Men (1991)", "Marvel"), -- 9
+
+    -- some graphic novels
+    ("The Infinity Gauntlet", "Marvel"), -- 10
+    ("Watchmen", "DC Comics"),          -- 11
+    ("Batman: The Dark Knight Returns", "DC Comics"), -- 12
+    ("V for Vendetta", "DC Comics"), -- 13
+
+    -- some dc comics
+    ("Batman: The Dark Knight (2011)", "DC Comics"), -- 14
+    ("V for Vendetta (1988)", "DC Comics"), -- 15
+    ("V for Vendetta (1988)", "DC Comics"), -- 16
+    ("V for Vendetta (1988)", "DC Comics"), -- 17
+
+    -- some more graphic novels
+    ("East of West (2013)", "Image Comics"), -- 18
+    ("Old Man Hawkeye (2018)", "Marvel"), -- 19
+    ("The Sandman: Season of Mists (1990)", "DC Comics"), -- 20
+    ("Hellboy: The Chained Coffin and Others (1998)", "Dark Horse Comics"), -- 21
+    ("Batman: The Black Mirror (2011)", "DC Comics"); -- 22
+
+
+INSERT INTO storylines(name) VALUES
+    ("Amazing Spider-Man (1999)"), -- 1
+    ("X-Men (1991)"),               -- 2
+    ("The Infinity Gauntlet"),    -- 3
+    ("Watchmen"),              -- 4
+    ("Batman"), -- 5
+    ("V for Vendetta"), -- 6
+    ("East of West"), -- 7
+    ("Hawkeye"), -- 8
+    ("The Sandman"), -- 9
+    ("Hellboy"); -- 10
+
+INSERT INTO storyline_collectables(storyline_id, collectable_id) VALUES
+    (1, 1), -- spiderman -> spiderman(1999) #1
+    (1, 2), -- spiderman -> spiderman(1999) #2
+    (1, 3), -- spiderman -> spiderman(1999) #3
+    (1, 4), -- spiderman -> spiderman(1999) #4
+    (1, 5),  -- spiderman -> spiderman(1999) #5
+
+    (2, 6), -- xmen -> xmen(1991) #1
+    (2, 7), -- xmen -> xmen(1991) #2
+    (2, 8), -- xmen -> xmen(1991) #3
+    (2, 9), -- xmen -> xmen(1991) #4
+
+    (3, 10), -- infinity gauntlet
+    (4, 11), -- watchmen
+    (5, 12), -- batman
+    (6, 13), -- v for vendetta
+
+    (5, 14), -- batman -> batman: the dark knight returns
+    (6, 15), -- v for vendetta -> v for vendetta
+    (6, 16), -- v for vendetta -> v for vendetta
+    (6, 17), -- v for vendetta -> v for vendetta
+
+    (7, 18), -- east of west
+    (8, 19), -- hawkeye
+    (9, 20), -- the sandman
+    (10, 21), -- hellboy
+    (5, 22); -- batman -> batman: the black mirror
+
+INSERT INTO comics(collectable_id, issue_number) VALUES
+    (1, 1), -- spiderman(1999) #1
+    (2, 2), -- spiderman(1999) #2
+    (3, 3), -- spiderman(1999) #3
+    (4, 4), -- spiderman(1999) #4
+    (5, 5), -- spiderman(1999) #5
+
+    (6, 1), -- xmen(1991) #1
+    (7, 2), -- xmen(1991) #2
+    (8, 3), -- xmen(1991) #3
+    (9, 4), -- xmen(1991) #4
+
+    (14, 1), -- batman: the dark knight returns
+
+    (15, 1), -- v for vendetta
+    (16, 2), -- v for vendetta
+    (17, 3); -- v for vendetta
+
+
+INSERT INTO characters(character_name, character_profession) VALUES
+    ("Spider-Man", "Superhero"), -- 1
+    ("Wolverine", "Superhero"), -- 2
+    ("Jean Grey", "Superhero"), -- 3
+    ("Cyclops", "Superhero"), -- 4
+    ("Professor X", "Superhero"), -- 5
+    ("Thanos", "Supervillain"), -- 6
+    ("Batman", "Superhero"), -- 7
+    ("V", "Antihero"), -- 8
+    ("Captain Metropolis", "Superhero"), -- 9
+    ("Night Owl", "Superhero"), -- 10
+
+    ("Caitlin Fairchild", "Person"), -- 11
+    ("Roxanne Spaulding", "Person"), -- 12
+    ("Sarah Rainmaker", "Person"), -- 13
+
+    ("Hawkeye", "Superhero"), -- 14
+    ("Sandman", "Superhero"), -- 15
+    ("Hellboy", "Superhero"); -- 16
+
+INSERT INTO character_appearings(character_id, collectable_id) VALUES
+    (1, 1), -- spiderman -> spiderman(1999) #1
+    (1, 2), -- spiderman -> spiderman(1999) #2
+    (1, 3), -- spiderman -> spiderman(1999) #3
+    (1, 4), -- spiderman -> spiderman(1999) #4
+    (1, 5), -- spiderman -> spiderman(1999) #5
+
+    (2, 6), -- wolverine -> xmen(1991) #1
+    (3, 6), -- jean grey -> xmen(1991) #1
+    (4, 6), -- cyclops -> xmen(1991) #1
+    (5, 6), -- professor x -> xmen(1991) #1
+
+    (2, 7), -- wolverine -> xmen(1991) #2
+    (3, 7), -- jean grey -> xmen(1991) #2
+    (4, 7), -- cyclops -> xmen(1991) #2
+    (5, 7), -- professor x -> xmen(1991) #2
+
+    (2, 8), -- wolverine -> xmen(1991) #3
+    (3, 8), -- jean grey -> xmen(1991) #3
+    (4, 8), -- cyclops -> xmen(1991) #3
+    (5, 8), -- professor x -> xmen(1991) #3
+
+    (2, 9), -- wolverine -> xmen(1991) #4
+    (3, 9), -- jean grey -> xmen(1991) #4
+    (4, 9), -- cyclops -> xmen(1991) #4
+    (5, 9), -- professor x -> xmen(1991) #4
+
+    (6, 10), -- thanos -> infinity gauntlet
+    (7, 12), -- batman -> batman
+    (8, 13), -- v -> v for vendetta
+    (9, 11), -- captain metropolis -> watchmen
+    (10, 11), -- night owl -> watchmen
+
+    (7, 14), -- batman -> batman: the dark knight returns
+    (8, 15), -- v -> v for vendetta
+    (8, 16), -- v -> v for vendetta
+    (8, 17), -- v -> v for vendetta
+    (9, 15), -- captain metropolis -> v for vendetta
+    (9, 16), -- captain metropolis -> v for vendetta
+    (9, 17), -- captain metropolis -> v for vendetta
+    (10, 15), -- night owl -> v for vendetta
+    (10, 16), -- night owl -> v for vendetta
+    (10, 17), -- night owl -> v for vendetta
+
+    (11, 18), -- caitlin fairchild -> east of west
+    (12, 18), -- roxanne spaulding -> east of west
+    (13, 18), -- sarah rainmaker -> east of west
+
+    (14, 19), -- hawkeye -> hawkeye
+    (15, 20), -- sandman -> the sandman
+    (16, 21); -- hellboy -> hellboy
+
+
+INSERT INTO creators(first_name, last_name) VALUES
+    ("Stan", "Lee"), -- 1
+    ("Steve", "Ditko"), -- 2
+    ("Chris", "Claremont"), -- 3
+    ("Jim", "Lee"), -- 4
+    ("Jim", "Starlin"), -- 5
+    ("George", "Pérez"), -- 6
+    ("Alan", "Moore"), -- 7
+    ("Frank", "Miller"), -- 8
+    ("David", "Lloyd"), -- 9
+    ("Dave", "Gibbons"), -- 10
+    ("Alan", "Moore"), -- 11
+    ("Brian", "Bolland"), -- 12
+    ("Scott", "Snyder"), -- 13
+    ("Mike", "Mignola"); -- 14
+
+INSERT INTO feature_work(creator_id, collectable_id, job) VALUES
+    (1, 1, "Writer"), -- stan lee -> spiderman(1999) #1
+    (2, 1, "Artist"), -- steve ditko -> spiderman(1999) #1
+    (1, 2, "Writer"), -- stan lee -> spiderman(1999) #2
+    (2, 2, "Artist"), -- steve ditko -> spiderman(1999) #2
+    (1, 3, "Writer"), -- stan lee -> spiderman(1999) #3
+    (2, 3, "Artist"), -- steve ditko -> spiderman(1999) #3
+    (1, 4, "Writer"), -- stan lee -> spiderman(1999) #4
+    (2, 4, "Artist"), -- steve ditko -> spiderman(1999) #4
+    (1, 5, "Writer"), -- stan lee -> spiderman(1999) #5
+    (2, 5, "Artist"), -- steve ditko -> spiderman(1999) #5
+
+    (3, 6, "Writer"), -- chris claremont -> xmen(1991) #1
+    (6, 6, "Artist"), -- george pérez -> xmen(1991) #1
+    (3, 7, "Writer"), -- chris claremont -> xmen(1991) #2
+    (6, 7, "Artist"), -- george pérez -> xmen(1991) #2
+    (3, 8, "Writer"), -- chris claremont -> xmen(1991) #3
+    (6, 8, "Artist"), -- george pérez -> xmen(1991) #3
+    (3, 9, "Writer"), -- chris claremont -> xmen(1991) #4
+    (6, 9, "Artist"), -- george pérez -> xmen(1991) #4
+
+    (5, 10, "Writer"), -- jim starlin -> infinity gauntlet
+    (4, 10, "Artist"), -- jim lee -> infinity gauntlet
+    (7, 11, "Writer"), -- alan moore -> watchmen
+    (9, 11, "Artist"), -- david lloyd -> watchmen
+    (8, 12, "Writer"), -- frank miller -> batman
+    (4, 12, "Artist"), -- jim lee -> batman
+    (7, 13, "Writer"), -- alan moore -> v for vendetta
+    (8, 13, "Artist"), -- frank miller -> v for vendetta
+
+    (7, 14, "Writer"), -- alan moore -> batman: the dark knight returns
+    (8, 14, "Artist"), -- frank miller -> batman: the dark knight returns
+    (7, 15, "Writer"), -- alan moore -> v for vendetta
+    (9, 15, "Artist"), -- david lloyd -> v for vendetta
+    (7, 16, "Writer"), -- alan moore -> v for vendetta
+    (9, 16, "Artist"), -- david lloyd -> v for vendetta
+    (7, 17, "Writer"), -- alan moore -> v for vendetta
+    (9, 17, "Artist"), -- david lloyd -> v for vendetta
+
+    (7, 18, "Writer"), -- Alan moore - v for vendetta
+    (9, 18, "Artist"), -- David lloyd - v for vendetta
+
+    (10, 19, "Artist"), -- mike mignola -> hawkeye
+    (11, 20, "Writer"), -- scott snyder -> the sandman
+    (12, 21, "Writer"), -- brian bolland -> hellboy
+
+    (4, 22, "Writer"); -- Jim Lee -> Batman
+
+
+-- some customers
+INSERT INTO addresses(street, city, state, zip_code) VALUES
+    ("Musterstraße", "Stuttgart", "Germany", "70701"), -- 1
+    ("Keinestaße", "Meisenbach", "Germany", "73469"), -- 2
+    ("Irgendwostraße", "Lautern", "Germany", "66666"), -- 3
+    ("UCD Belfield", "Dublin", "Ireland", "D04 E021"), -- 4
+    ("Gibtsnichtallee", "Fellbach", "Germany", "70702"), -- 5
+    ("Hauptstraße", "Stuttgart", "Germany", "70701"); -- 6
+
+INSERT INTO customers(first_name, last_name, address_id, dob) VALUES
+    ("Korenz", "Lause", 1, "2002-12-13"), -- 1
+    ("Kario", "Moepcke", 2, "2003-01-01"), -- 2
+    ("Jonas", "Sichel", 3,"2002-03-11"), -- 3
+    ("Bert", "Beispiel", 4, "2000-01-01"), -- 4
+    ("Max", "Mustermann", 5, "2001-01-01"), -- 5
+    ("Erika", "Mustermann", 6, "2001-01-01"); -- 6
