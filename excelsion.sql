@@ -1,3 +1,5 @@
+DROP DATABASE excelsior;
+
 CREATE DATABASE excelsior;
 
 USE excelsior;
@@ -124,6 +126,7 @@ CREATE TABLE sold_items(
     sold_item_id INT NOT NULL AUTO_INCREMENT,
     customer_id INT NOT NULL,
     stock_id INT NOT NULL,
+    sale_date DATE NOT NULL DEFAULT (CURRENT_DATE),
     PRIMARY KEY(sold_item_id),
     FOREIGN KEY(customer_id) REFERENCES customers(customer_id),
     FOREIGN KEY(stock_id) REFERENCES stock(stock_id)
@@ -417,7 +420,8 @@ INSERT INTO character_appearings(character_id, collectable_id) VALUES
 
     (14, 19), -- hawkeye -> hawkeye
     (15, 20), -- sandman -> the sandman
-    (16, 21); -- hellboy -> hellboy
+    (16, 21), -- hellboy -> hellboy
+    (7, 22); -- batman -> batman
 
 
 INSERT INTO creators(first_name, last_name) VALUES
@@ -488,7 +492,7 @@ INSERT INTO feature_work(creator_id, collectable_id, job) VALUES
 -- some customers
 INSERT INTO addresses(street, city, state, zip_code) VALUES
     ("Musterstraße", "Stuttgart", "Germany", "70701"), -- 1
-    ("Keinestaße", "Meisenbach", "Germany", "73469"), -- 2
+    ("Keinestaße", "Maisenbach", "Germany", "73469"), -- 2
     ("Irgendwostraße", "Lautern", "Germany", "66666"), -- 3
     ("UCD Belfield", "Dublin", "Ireland", "D04 E021"), -- 4
     ("Gibtsnichtallee", "Fellbach", "Germany", "70702"), -- 5
@@ -501,3 +505,44 @@ INSERT INTO customers(first_name, last_name, address_id, dob) VALUES
     ("Bert", "Beispiel", 4, "2000-01-01"), -- 4
     ("Max", "Mustermann", 5, "2001-01-01"), -- 5
     ("Erika", "Mustermann", 6, "2001-01-01"); -- 6
+
+
+INSERT INTO stock(collectable_id, condition_id, edition, buying_price, selling_price, comment, in_stock) VALUES
+    (1, 6.5, 1, 5.93, 69.91, NULL, True ), -- stock_id: 1
+    (2, 3.2, 1, 3448.57, 4310.71, NULL, True ), -- stock_id: 2
+    (3, 3.2, 1, 1681.42, 2101.78, NULL, True ), -- stock_id: 3
+    (3, 6.3, 1, 9580.67, 11975.84, NULL, True ), -- stock_id: 4
+    (4, 9.0, 1, 6174.97, 7718.71, NULL, True ), -- stock_id: 5
+    (4, 3.7, 1, 7650.70, 9563.38, NULL, True ), -- stock_id: 6
+    (5, 10.0, 1, 2012.67, 2515.84, NULL, True ), -- stock_id: 7
+    (6, 0.3, 1, 9121.51, 11401.89, NULL, False ), -- stock_id: 8
+    (7, 2.0, 1, 8986.38, 11232.97, NULL, True ), -- stock_id: 9
+    (8, 1.2, 1, 6736.53, 8420.66, NULL, True ), -- stock_id: 10
+    (9, 1.3, 1, 600.78, 750.97, 'Owned by Stan Lee', True ), -- stock_id: 11
+    (9, 0.5, 1, 1932.36, 2415.45, NULL, False ), -- stock_id: 12
+    (10, 3.0, 1, 1341.74, 1677.17, 'Owned by Tony Stark', True ), -- stock_id: 13
+    (11, 9.3, 1, 2550.64, 3188.30, NULL, True ), -- stock_id: 14
+    (11, 1.1, 1, 9442.03, 11802.54, 'Signed by Tony Stark', True ), -- stock_id: 15
+    (12, 5.0, 1, 4087.74, 5109.67, NULL, True ), -- stock_id: 16
+    (13, 8.9, 1, 460.50, 5763.12, 'Signed by Tony Stark', False ), -- stock_id: 17
+    (13, 1.3, 1, 7019.78, 8774.73, NULL, True ), -- stock_id: 18
+    (14, 2.9, 1, 3970.14, 4962.68, NULL, True ), -- stock_id: 19
+    (14, 6.2, 1, 9078.98, 11348.72, 'Owned by Stan Lee', True ), -- stock_id: 20
+    (15, 4.9, 1, 7924.99, 9906.24, NULL, True ), -- stock_id: 21
+    (16, 6.1, 1, 91.19, 115.24, 'Owned by Tony Stark', True ), -- stock_id: 22
+    (17, 9.5, 1, 5265.84, 6582.30, NULL, True ), -- stock_id: 23
+    (18, 9.1, 1, 3051.89, 3814.86, NULL, True ), -- stock_id: 24
+    (19, 7.8, 1, 458.23, 5734.04, NULL, True ), -- stock_id: 25
+    (20, 2.0, 1, 6778.95, 8473.69, NULL, True ), -- stock_id: 26
+    (21, 6.5, 1, 8429.73, 10537.16, 'Owned by Tony Stark', True ), -- stock_id: 27
+    (22, 3.2, 1, 4428.73, 5535.91, NULL, False ); -- stock_id: 28
+
+
+INSERT INTO sold_items(stock_id, customer_id) VALUES
+    (8, 2 ),
+    (12, 1),
+    (17, 3),
+    (25, 1),
+    (28, 4);
+
+
