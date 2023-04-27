@@ -110,19 +110,19 @@ CREATE TABLE customers(
 CREATE TABLE wishlist(
     wishlist_id INT NOT NULL AUTO_INCREMENT,
     customer_id INT NOT NULL,
-    collectable_id INT NOT NULL,
+    stock_id INT NOT NULL,
     PRIMARY KEY(wishlist_id),
     FOREIGN KEY(customer_id) REFERENCES customers(customer_id) ON DELETE CASCADE,
-    FOREIGN KEY(collectable_id) REFERENCES collectables(collectable_id) ON DELETE CASCADE
+    FOREIGN KEY(stock_id) REFERENCES stock(stock_id) ON DELETE CASCADE
 );
 
 CREATE TABLE shopping_cart(
     shopping_cart_id INT NOT NULL AUTO_INCREMENT,
     customer_id INT NOT NULL,
-    collectable_id INT NOT NULL,
+    stock_id INT NOT NULL,
     PRIMARY KEY(shopping_cart_id),
     FOREIGN KEY(customer_id) REFERENCES customers(customer_id) ON DELETE CASCADE,
-    FOREIGN KEY(collectable_id) REFERENCES collectables(collectable_id) ON DELETE CASCADE
+    FOREIGN KEY(stock_id) REFERENCES stock(stock_id) ON DELETE CASCADE
 );
 
 CREATE TABLE sold_items(
@@ -542,7 +542,7 @@ INSERT INTO sold_items(stock_id, customer_id) VALUES
 
 
 
-INSERT INTO wishlist(customer_id, collectable_id) VALUES
+INSERT INTO wishlist(customer_id, stock_id) VALUES
     (5, 3),
     (5, 19),
     (5, 9),
@@ -554,3 +554,30 @@ INSERT INTO wishlist(customer_id, collectable_id) VALUES
     (1, 1),
     (3, 7),
     (3, 4);
+
+INSERT INTO shopping_cart(customer_id, stock_id) VALUES
+    (5, 3),
+    (5, 19),
+    (5, 9),
+    (6, 1),
+    (1, 7),
+    (4, 3),
+    (3, 19),
+    (2, 9),
+    (1, 1),
+    (3, 7),
+    (3, 4);
+
+--
+
+-- from here on some views for the frontend
+
+
+CREATE VIEW extended_shopping_cart AS
+    SELECT cl.title, cm.issue_number ,st.condition_id, cd.textual_condition, st.buying_price, st.selling_price, cst.first_name, cst.last_name
+        FROM stock st
+        JOIN shopping_cart sc ON st.stock_id = sc.stock_id
+        JOIN collectables cl ON st.collectable_id = cl.collectable_id
+        JOIN conditions cd ON st.condition_id = cd.condition_id
+        JOIN customers cst ON sc.customer_id = cst.customer_id
+        LEFT JOIN comics cm ON cl.collectable_id = cm.collectable_id;
