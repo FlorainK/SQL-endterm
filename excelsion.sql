@@ -4,34 +4,28 @@ CREATE DATABASE excelsior;
 
 USE excelsior;
 
-CREATE TABLE collectables(
-    collectable_id INT NOT NULL AUTO_INCREMENT,
-    title VARCHAR(255) NOT NULL,
-    publisher VARCHAR(255) NOT NULL,
-    PRIMARY KEY(collectable_id)
-);
-
 CREATE TABLE storylines(
     storyline_id INT NOT NULL AUTO_INCREMENT,
     name VARCHAR(255) NOT NULL,
     PRIMARY KEY(storyline_id)
 );
 
-CREATE TABLE storyline_collectables(
-    storyline_collectable_id INT NOT NULL AUTO_INCREMENT,
+CREATE TABLE collectables(
+    collectable_id INT NOT NULL AUTO_INCREMENT,
+    title VARCHAR(255) NOT NULL,
+    publisher VARCHAR(255) NOT NULL,
     storyline_id INT NOT NULL,
-    collectable_id INT NOT NULL,
-    PRIMARY KEY(storyline_collectable_id),
-    FOREIGN KEY(storyline_id) REFERENCES storylines(storyline_id),
-    FOREIGN KEY(collectable_id) REFERENCES collectables(collectable_id)
+    PRIMARY KEY(collectable_id),
+    FOREIGN KEY(storyline_id) REFERENCES storylines(storyline_id)
 );
+
 
 CREATE TABLE comics(
     comic_id INT NOT NULL AUTO_INCREMENT,
     collectable_id INT NOT NULL,
     issue_number INT NOT NULL,
     PRIMARY KEY(comic_id),
-    FOREIGN KEY(collectable_id) REFERENCES collectables(collectable_id)
+    FOREIGN KEY(collectable_id) REFERENCES collectables(collectable_id) ON DELETE CASCADE
 );
 
 CREATE TABLE creators(
@@ -47,8 +41,8 @@ CREATE TABLE feature_work(
     collectable_id INT NOT NULL,
     job VARCHAR(255) NOT NULL,
     PRIMARY KEY(feature_work_id),
-    FOREIGN KEY(creator_id) REFERENCES creators(creator_id),
-    FOREIGN KEY(collectable_id) REFERENCES collectables(collectable_id)
+    FOREIGN KEY(creator_id) REFERENCES creators(creator_id) ON DELETE CASCADE,
+    FOREIGN KEY(collectable_id) REFERENCES collectables(collectable_id) ON DELETE CASCADE
 );
 
 CREATE TABLE characters(
@@ -63,8 +57,8 @@ CREATE TABLE character_appearings(
     character_id INT NOT NULL,
     collectable_id INT NOT NULL,
     PRIMARY KEY(character_appearing_id),
-    FOREIGN KEY(character_id) REFERENCES characters(character_id),
-    FOREIGN KEY(collectable_id) REFERENCES collectables(collectable_id)
+    FOREIGN KEY(character_id) REFERENCES characters(character_id) ON DELETE CASCADE,
+    FOREIGN KEY(collectable_id) REFERENCES collectables(collectable_id) ON DELETE CASCADE
 );
 CREATE TABLE condition_descriptions(
     textual_condition VARCHAR(255) NOT NULL,
@@ -113,13 +107,22 @@ CREATE TABLE customers(
     FOREIGN KEY(address_id) REFERENCES addresses(address_id)
 );
 
+CREATE TABLE wishlist(
+    wishlist_id INT NOT NULL AUTO_INCREMENT,
+    customer_id INT NOT NULL,
+    collectable_id INT NOT NULL,
+    PRIMARY KEY(wishlist_id),
+    FOREIGN KEY(customer_id) REFERENCES customers(customer_id) ON DELETE CASCADE,
+    FOREIGN KEY(collectable_id) REFERENCES collectables(collectable_id) ON DELETE CASCADE
+);
+
 CREATE TABLE shopping_cart(
     shopping_cart_id INT NOT NULL AUTO_INCREMENT,
     customer_id INT NOT NULL,
     collectable_id INT NOT NULL,
     PRIMARY KEY(shopping_cart_id),
-    FOREIGN KEY(customer_id) REFERENCES customers(customer_id),
-    FOREIGN KEY(collectable_id) REFERENCES collectables(collectable_id)
+    FOREIGN KEY(customer_id) REFERENCES customers(customer_id) ON DELETE CASCADE,
+    FOREIGN KEY(collectable_id) REFERENCES collectables(collectable_id) ON DELETE CASCADE
 );
 
 CREATE TABLE sold_items(
@@ -257,38 +260,6 @@ INSERT INTO conditions(condition_id, textual_condition) VALUES
     (10.0, "MT");
 
 
--- Spider Man
-INSERT INTO collectables(title, publisher) VALUES
-    ("Amazing Spider-Man (1999)", "Marvel"), -- 1
-    ("Amazing Spider-Man (1999)", "Marvel"), -- 2
-    ("Amazing Spider-Man (1999)", "Marvel"), -- 3
-    ("Amazing Spider-Man (1999)", "Marvel"), -- 4
-    ("Amazing Spider-Man (1999)", "Marvel"), -- 5
-
-    -- some xmen comics
-    ("X-Men (1991)", "Marvel"), -- 6
-    ("X-Men (1991)", "Marvel"), -- 7
-    ("X-Men (1991)", "Marvel"), -- 8
-    ("X-Men (1991)", "Marvel"), -- 9
-
-    -- some graphic novels
-    ("The Infinity Gauntlet", "Marvel"), -- 10
-    ("Watchmen", "DC Comics"),          -- 11
-    ("Batman: The Dark Knight Returns", "DC Comics"), -- 12
-    ("V for Vendetta", "DC Comics"), -- 13
-
-    -- some dc comics
-    ("Batman: The Dark Knight (2011)", "DC Comics"), -- 14
-    ("V for Vendetta (1988)", "DC Comics"), -- 15
-    ("V for Vendetta (1988)", "DC Comics"), -- 16
-    ("V for Vendetta (1988)", "DC Comics"), -- 17
-
-    -- some more graphic novels
-    ("East of West (2013)", "Image Comics"), -- 18
-    ("Old Man Hawkeye (2018)", "Marvel"), -- 19
-    ("The Sandman: Season of Mists (1990)", "DC Comics"), -- 20
-    ("Hellboy: The Chained Coffin and Others (1998)", "Dark Horse Comics"), -- 21
-    ("Batman: The Black Mirror (2011)", "DC Comics"); -- 22
 
 
 INSERT INTO storylines(name) VALUES
@@ -302,34 +273,41 @@ INSERT INTO storylines(name) VALUES
     ("Hawkeye"), -- 8
     ("The Sandman"), -- 9
     ("Hellboy"); -- 10
+INSERT INTO collectables(title, publisher, storyline_id) VALUES
+    ("Amazing Spider-Man (1999)", "Marvel", 1), -- 1
+    ("Amazing Spider-Man (1999)", "Marvel", 1), -- 2
+    ("Amazing Spider-Man (1999)", "Marvel", 1), -- 3
+    ("Amazing Spider-Man (1999)", "Marvel", 1), -- 4
+    ("Amazing Spider-Man (1999)", "Marvel", 1), -- 5
 
-INSERT INTO storyline_collectables(storyline_id, collectable_id) VALUES
-    (1, 1), -- spiderman -> spiderman(1999) #1
-    (1, 2), -- spiderman -> spiderman(1999) #2
-    (1, 3), -- spiderman -> spiderman(1999) #3
-    (1, 4), -- spiderman -> spiderman(1999) #4
-    (1, 5),  -- spiderman -> spiderman(1999) #5
+    -- some xmen comics
+    ("X-Men (1991)", "Marvel", 2), -- 6
+    ("X-Men (1991)", "Marvel", 2), -- 7
+    ("X-Men (1991)", "Marvel", 2), -- 8
+    ("X-Men (1991)", "Marvel", 2), -- 9
 
-    (2, 6), -- xmen -> xmen(1991) #1
-    (2, 7), -- xmen -> xmen(1991) #2
-    (2, 8), -- xmen -> xmen(1991) #3
-    (2, 9), -- xmen -> xmen(1991) #4
+    -- some graphic novels
+    ("The Infinity Gauntlet", "Marvel", 3), -- 10
+    ("Watchmen", "DC Comics", 4),          -- 11
+    ("Batman: The Dark Knight Returns", "DC Comics", 5), -- 12
+    ("V for Vendetta", "DC Comics", 6), -- 13
 
-    (3, 10), -- infinity gauntlet
-    (4, 11), -- watchmen
-    (5, 12), -- batman
-    (6, 13), -- v for vendetta
+    -- some dc comics
+    ("Batman: The Dark Knight (2011)", "DC Comics", 5), -- 14
+    ("V for Vendetta (1988)", "DC Comics", 6), -- 15
+    ("V for Vendetta (1988)", "DC Comics", 6), -- 16
+    ("V for Vendetta (1988)", "DC Comics", 6), -- 17
 
-    (5, 14), -- batman -> batman: the dark knight returns
-    (6, 15), -- v for vendetta -> v for vendetta
-    (6, 16), -- v for vendetta -> v for vendetta
-    (6, 17), -- v for vendetta -> v for vendetta
+    -- some more graphic novels
+    ("East of West (2013)", "Image Comics", 7), -- 18
+    ("Old Man Hawkeye (2018)", "Marvel", 8), -- 19
+    ("The Sandman: Season of Mists (1990)", "DC Comics", 9), -- 20
+    ("Hellboy: The Chained Coffin and Others (1998)", "Dark Horse Comics", 10), -- 21
+    ("Batman: The Black Mirror (2011)", "DC Comics", 5); -- 22
 
-    (7, 18), -- east of west
-    (8, 19), -- hawkeye
-    (9, 20), -- the sandman
-    (10, 21), -- hellboy
-    (5, 22); -- batman -> batman: the black mirror
+
+
+
 
 INSERT INTO comics(collectable_id, issue_number) VALUES
     (1, 1), -- spiderman(1999) #1
@@ -496,7 +474,13 @@ INSERT INTO addresses(street, city, state, zip_code) VALUES
     ("Irgendwostraße", "Lautern", "Germany", "66666"), -- 3
     ("UCD Belfield", "Dublin", "Ireland", "D04 E021"), -- 4
     ("Gibtsnichtallee", "Fellbach", "Germany", "70702"), -- 5
-    ("Hauptstraße", "Stuttgart", "Germany", "70701"); -- 6
+    ("Hauptstraße", "Stuttgart", "Germany", "70701"), -- 6
+    ("Oberhofstraße", "Munich", "Germany", "80331"), -- 7
+    ("Burgweg", "Frankfurt", "Germany", "60311"), -- 8
+    ("Bryson Road", "London", "United Kingdom", "SW19 1EX"), -- 9
+    ("Bismarckstraße", "Dresden", "Germany", "01097"), -- 10
+    ("Rue du Bac", "Paris", "France", "75007"), -- 11
+    ("Via Garibaldi", "Rome", "Italy", "00153"); -- 12
 
 INSERT INTO customers(first_name, last_name, address_id, dob) VALUES
     ("Korenz", "Lause", 1, "2002-12-13"), -- 1
@@ -504,7 +488,13 @@ INSERT INTO customers(first_name, last_name, address_id, dob) VALUES
     ("Jonas", "Sichel", 3,"2002-03-11"), -- 3
     ("Bert", "Beispiel", 4, "2000-01-01"), -- 4
     ("Max", "Mustermann", 5, "2001-01-01"), -- 5
-    ("Erika", "Mustermann", 6, "2001-01-01"); -- 6
+    ("Erika", "Mustermann", 6, "2001-01-01"), -- 6
+    ("Oliver", "Meier", 7, "1999-12-05"), -- 7
+    ("Lena", "Schmidt", 8, "2000-02-14"), -- 8
+    ("Maximilian", "Schulze", 9, "1998-05-31"), -- 9
+    ("Anna", "Müller", 10, "2003-08-23"), -- 10
+    ("Julia", "König", 11, "1999-10-15"), -- 11
+    ("Niklas", "Schneider", 12, "2001-04-02"); -- 12
 
 
 INSERT INTO stock(collectable_id, condition_id, edition, buying_price, selling_price, comment, in_stock) VALUES
@@ -514,7 +504,7 @@ INSERT INTO stock(collectable_id, condition_id, edition, buying_price, selling_p
     (3, 6.3, 1, 9580.67, 11975.84, NULL, True ), -- stock_id: 4
     (4, 9.0, 1, 6174.97, 7718.71, NULL, True ), -- stock_id: 5
     (4, 3.7, 1, 7650.70, 9563.38, NULL, True ), -- stock_id: 6
-    (5, 10.0, 1, 2012.67, 2515.84, NULL, True ), -- stock_id: 7
+    (5, 10.0, 1, 2012.67, 2515.84, NULL, False ), -- stock_id: 7
     (6, 0.3, 1, 9121.51, 11401.89, NULL, False ), -- stock_id: 8
     (7, 2.0, 1, 8986.38, 11232.97, NULL, True ), -- stock_id: 9
     (8, 1.2, 1, 6736.53, 8420.66, NULL, True ), -- stock_id: 10
@@ -527,8 +517,8 @@ INSERT INTO stock(collectable_id, condition_id, edition, buying_price, selling_p
     (13, 8.9, 1, 460.50, 5763.12, 'Signed by Tony Stark', False ), -- stock_id: 17
     (13, 1.3, 1, 7019.78, 8774.73, NULL, True ), -- stock_id: 18
     (14, 2.9, 1, 3970.14, 4962.68, NULL, True ), -- stock_id: 19
-    (14, 6.2, 1, 9078.98, 11348.72, 'Owned by Stan Lee', True ), -- stock_id: 20
-    (15, 4.9, 1, 7924.99, 9906.24, NULL, True ), -- stock_id: 21
+    (14, 6.2, 1, 9078.98, 11348.72, 'Owned by Stan Lee', False ), -- stock_id: 20
+    (15, 4.9, 1, 7924.99, 9906.24, NULL, False ), -- stock_id: 21
     (16, 6.1, 1, 91.19, 115.24, 'Owned by Tony Stark', True ), -- stock_id: 22
     (17, 9.5, 1, 5265.84, 6582.30, NULL, True ), -- stock_id: 23
     (18, 9.1, 1, 3051.89, 3814.86, NULL, True ), -- stock_id: 24
@@ -543,6 +533,24 @@ INSERT INTO sold_items(stock_id, customer_id) VALUES
     (12, 1),
     (17, 3),
     (25, 1),
-    (28, 4);
+    (28, 4),
+    (5, 1),
+    (6, 2),
+    (15, 4),
+    (20, 4),
+    (21, 3);
 
 
+
+INSERT INTO wishlist(customer_id, collectable_id) VALUES
+    (5, 3),
+    (5, 19),
+    (5, 9),
+    (6, 1),
+    (1, 7),
+    (4, 3),
+    (3, 19),
+    (2, 9),
+    (1, 1),
+    (3, 7),
+    (3, 4);
