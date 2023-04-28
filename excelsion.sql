@@ -611,3 +611,24 @@ CREATE VIEW available_stock AS
         LEFT JOIN comics cm ON cl.collectable_id = cm.collectable_id
         LEFT JOIN comments c ON st.stock_id = c.stock_id
         WHERE st.in_stock IS True;
+
+
+CREATE VIEW sold_stock AS
+    SELECT cl.title, cm.issue_number ,st.condition_id, cd.textual_condition, st.buying_price, st.selling_price, c.comment, cst.first_name, cst.last_name
+        FROM stock st
+        JOIN collectables cl ON st.collectable_id = cl.collectable_id
+        JOIN conditions cd ON st.condition_id = cd.condition_id
+        LEFT JOIN comics cm ON cl.collectable_id = cm.collectable_id
+        LEFT JOIN comments c ON st.stock_id = c.stock_id
+        JOIN sold_items si ON st.stock_id = si.stock_id
+        JOIN customers cst ON si.customer_id = cst.customer_id;
+
+
+CREATE VIEW storyline_character_appearings AS
+    SELECT storylines.name, character_name, COUNT(*) AS num_appearances
+    FROM character_appearings
+    JOIN collectables ON character_appearings.collectable_id = collectables.collectable_id
+    JOIN storylines ON collectables.storyline_id = storylines.storyline_id
+    JOIN characters ON character_appearings.character_id = characters.character_id
+    GROUP BY storylines.storyline_id, characters.character_id
+    ORDER BY name ASC;
