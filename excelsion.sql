@@ -590,9 +590,7 @@ INSERT INTO shopping_cart(customer_id, stock_id) VALUES
 
 --
 
--- from here on some views for the frontend
-
-
+-- from here on some views
 CREATE VIEW extended_shopping_cart AS
     SELECT cl.title, cm.issue_number ,st.condition_id, cd.textual_condition, st.buying_price, st.selling_price, cst.first_name, cst.last_name
         FROM stock st
@@ -632,3 +630,28 @@ CREATE VIEW storyline_character_appearings AS
     JOIN characters ON character_appearings.character_id = characters.character_id
     GROUP BY storylines.storyline_id, characters.character_id
     ORDER BY name ASC;
+
+CREATE VIEW best_customers AS
+    SELECT c.customer_id, CONCAT(c.first_name, ' ', c.last_name) AS customer_name, SUM(selling_price) AS total_spent
+        FROM customers c
+        JOIN sold_items s ON c.customer_id = s.customer_id
+        JOIN stock st ON s.stock_id = st.stock_id
+        GROUP BY c.customer_id
+        ORDER BY total_spent DESC;
+
+
+--  from here on some queries
+
+SELECT s.stock_id, c.title,s.condition_id, s.buying_price, s.selling_price, s.format, s.in_stock
+    FROM stock s
+    JOIN collectables c ON s.collectable_id = c.collectable_id
+    JOIN feature_work f ON c.collectable_id = f.collectable_id
+    JOIN creators cr ON f.creator_id = cr.creator_id
+    WHERE cr.creator_id = 1
+    AND s.in_stock IS True;
+
+SELECT conditions.textual_condition, MIN(condition_id) AS minimal_rating, MAX(condition_id) AS maximal_rating, condition_description
+    FROM conditions
+    JOIN condition_descriptions ON conditions.textual_condition = condition_descriptions.textual_condition
+    GROUP BY textual_condition
+    ORDER BY maximal_rating DESC;
