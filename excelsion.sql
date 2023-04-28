@@ -81,11 +81,19 @@ CREATE TABLE stock(
     edition INT NOT NULL,
     buying_price DECIMAL(10,2) NOT NULL,
     selling_price DECIMAL(10,2) NOT NULL,
-    comment TEXT,
+    format VARCHAR(255) NOT NULL,
     in_stock BOOLEAN NOT NULL,
     PRIMARY KEY(stock_id),
     FOREIGN KEY(collectable_id) REFERENCES collectables(collectable_id),
     FOREIGN KEY(condition_id) REFERENCES conditions(condition_id)
+);
+
+CREATE TABLE comments(
+    comment_id INT NOT NULL AUTO_INCREMENT,
+    stock_id INT NOT NULL,
+    comment TEXT NOT NULL,
+    PRIMARY KEY(comment_id),
+    FOREIGN KEY(stock_id) REFERENCES stock(stock_id) ON DELETE CASCADE
 );
 
 CREATE TABLE addresses(
@@ -137,7 +145,7 @@ CREATE TABLE sold_items(
 
 -- From here on dummy data
 
--- conditions
+
 INSERT INTO condition_descriptions(textual_condition, condition_description) VALUES
     ("MT", "Mint:Near perfect in every way. Only the most subtle bindery or printing defects are allowed. Cover is flat with no surface wear. Cover inks are bright with high reflectivity and minimal fading. Corners are cut square and sharp. Staples are generally centered, clean with no rust. Cover is generally well centered and firmly secured to interior pages. Paper is supple and fresh. Spine is tight and flat."),
     ("NM/MT", "Near-Mint/Mint: A comic book that has enough positive qualities to make it better than a NM, but has enough detracting qualities to keep it from being a MT 9.9."),
@@ -467,7 +475,7 @@ INSERT INTO feature_work(creator_id, collectable_id, job) VALUES
     (4, 22, "Writer"); -- Jim Lee -> Batman
 
 
--- some customers
+
 INSERT INTO addresses(street, city, state, zip_code) VALUES
     ("Musterstraße", "Stuttgart", "Germany", "70701"), -- 1
     ("Keinestaße", "Maisenbach", "Germany", "73469"), -- 2
@@ -497,35 +505,47 @@ INSERT INTO customers(first_name, last_name, address_id, dob) VALUES
     ("Niklas", "Schneider", 12, "2001-04-02"); -- 12
 
 
-INSERT INTO stock(collectable_id, condition_id, edition, buying_price, selling_price, comment, in_stock) VALUES
-    (1, 6.5, 1, 5.93, 69.91, NULL, True ), -- stock_id: 1
-    (2, 3.2, 1, 3448.57, 4310.71, NULL, True ), -- stock_id: 2
-    (3, 3.2, 1, 1681.42, 2101.78, NULL, True ), -- stock_id: 3
-    (3, 6.3, 1, 9580.67, 11975.84, NULL, True ), -- stock_id: 4
-    (4, 9.0, 1, 6174.97, 7718.71, NULL, True ), -- stock_id: 5
-    (4, 3.7, 1, 7650.70, 9563.38, NULL, True ), -- stock_id: 6
-    (5, 10.0, 1, 2012.67, 2515.84, NULL, False ), -- stock_id: 7
-    (6, 0.3, 1, 9121.51, 11401.89, NULL, False ), -- stock_id: 8
-    (7, 2.0, 1, 8986.38, 11232.97, NULL, True ), -- stock_id: 9
-    (8, 1.2, 1, 6736.53, 8420.66, NULL, True ), -- stock_id: 10
-    (9, 1.3, 1, 600.78, 750.97, 'Owned by Stan Lee', True ), -- stock_id: 11
-    (9, 0.5, 1, 1932.36, 2415.45, NULL, False ), -- stock_id: 12
-    (10, 3.0, 1, 1341.74, 1677.17, 'Owned by Tony Stark', True ), -- stock_id: 13
-    (11, 9.3, 1, 2550.64, 3188.30, NULL, True ), -- stock_id: 14
-    (11, 1.1, 1, 9442.03, 11802.54, 'Signed by Tony Stark', True ), -- stock_id: 15
-    (12, 5.0, 1, 4087.74, 5109.67, NULL, True ), -- stock_id: 16
-    (13, 8.9, 1, 460.50, 5763.12, 'Signed by Tony Stark', False ), -- stock_id: 17
-    (13, 1.3, 1, 7019.78, 8774.73, NULL, True ), -- stock_id: 18
-    (14, 2.9, 1, 3970.14, 4962.68, NULL, True ), -- stock_id: 19
+INSERT INTO stock(collectable_id, condition_id, edition, buying_price, selling_price, format, in_stock) VALUES
+    (1, 6.5, 1, 5.93, 69.91, "paperback", True ), -- stock_id: 1
+    (2, 3.2, 1, 3448.57, 4310.71, "paperback", True ), -- stock_id: 2
+    (3, 3.2, 1, 1681.42, 2101.78, "paperback", True ), -- stock_id: 3
+    (3, 6.3, 1, 9580.67, 11975.84, "paperback", True ), -- stock_id: 4
+    (4, 9.0, 1, 6174.97, 7718.71, "paperback", True ), -- stock_id: 5
+    (4, 3.7, 1, 7650.70, 9563.38, "paperback", True ), -- stock_id: 6
+    (5, 10.0, 1, 2012.67, 2515.84, "paperback, jumbo sized cover", False ), -- stock_id: 7
+    (6, 0.3, 1, 9121.51, 11401.89, "paperback, jumbo sized cover", False ), -- stock_id: 8
+    (7, 2.0, 1, 8986.38, 11232.97, "paperback, jumbo sized cover", True ), -- stock_id: 9
+    (8, 1.2, 1, 6736.53, 8420.66, "paperback", True ), -- stock_id: 10
+    (9, 1.3, 1, 600.78, 750.97, "paperback, jumbo sized cover", True ), -- stock_id: 11
+    (9, 0.5, 1, 1932.36, 2415.45, "paperback", False ), -- stock_id: 12
+    (10, 3.0, 1, 1341.74, 1677.17, "paperback, jumbo sized cover", True ), -- stock_id: 13
+    (11, 9.3, 1, 2550.64, 3188.30, "paperback, jumbo sized cover", True ), -- stock_id: 14
+    (11, 1.1, 1, 9442.03, 11802.54, "hardcover", True ), -- stock_id: 15
+    (12, 5.0, 1, 4087.74, 5109.67, "hardcover", True ), -- stock_id: 16
+    (13, 8.9, 1, 460.50, 5763.12, "hardcover", False ), -- stock_id: 17
+    (13, 1.3, 1, 7019.78, 8774.73, "paperback", True ), -- stock_id: 18
+    (14, 2.9, 1, 3970.14, 4962.68, "hardcover", True ), -- stock_id: 19
     (14, 6.2, 1, 9078.98, 11348.72, 'Owned by Stan Lee', False ), -- stock_id: 20
-    (15, 4.9, 1, 7924.99, 9906.24, NULL, False ), -- stock_id: 21
-    (16, 6.1, 1, 91.19, 115.24, 'Owned by Tony Stark', True ), -- stock_id: 22
-    (17, 9.5, 1, 5265.84, 6582.30, NULL, True ), -- stock_id: 23
-    (18, 9.1, 1, 3051.89, 3814.86, NULL, True ), -- stock_id: 24
-    (19, 7.8, 1, 458.23, 5734.04, NULL, True ), -- stock_id: 25
-    (20, 2.0, 1, 6778.95, 8473.69, NULL, True ), -- stock_id: 26
-    (21, 6.5, 1, 8429.73, 10537.16, 'Owned by Tony Stark', True ), -- stock_id: 27
-    (22, 3.2, 1, 4428.73, 5535.91, NULL, False ); -- stock_id: 28
+    (15, 4.9, 1, 7924.99, 9906.24, "hardcover", False ), -- stock_id: 21
+    (16, 6.1, 1, 91.19, 115.24, "hardcover", True ), -- stock_id: 22
+    (17, 9.5, 1, 5265.84, 6582.30, "paperback", True ), -- stock_id: 23
+    (18, 9.1, 1, 3051.89, 3814.86, "paperback", True ), -- stock_id: 24
+    (19, 7.8, 1, 458.23, 5734.04, "hardcover", True ), -- stock_id: 25
+    (20, 2.0, 1, 6778.95, 8473.69, "hardcover", True ), -- stock_id: 26
+    (21, 6.5, 1, 8429.73, 10537.16, "paperback", True ), -- stock_id: 27
+    (22, 3.2, 1, 4428.73, 5535.91, "hardcover", False ); -- stock_id: 28
+
+INSERT INTO comments(stock_id, comment) VALUES
+    (1, "Signed by Stan Lee"),
+    (2, "Very bad water damage"),
+    (7, "Signed by Mac Miller"),
+    (11, "Excellent condition"),
+    (4, "Comes in plastic box"),
+    (3, "Owned by Robert Downey JR"),
+    (8, "Signed by Bret Easton Ellis"),
+    (13, "Almost falling apart"),
+    (18, "Signed by Stephen King"),
+    (22, "Signed by J.K. Rowling");
 
 
 INSERT INTO sold_items(stock_id, customer_id) VALUES
@@ -581,3 +601,13 @@ CREATE VIEW extended_shopping_cart AS
         JOIN conditions cd ON st.condition_id = cd.condition_id
         JOIN customers cst ON sc.customer_id = cst.customer_id
         LEFT JOIN comics cm ON cl.collectable_id = cm.collectable_id;
+
+
+CREATE VIEW available_stock AS
+    SELECT cl.title, cm.issue_number ,st.condition_id, cd.textual_condition, st.buying_price, st.selling_price, c.comment
+        FROM stock st
+        JOIN collectables cl ON st.collectable_id = cl.collectable_id
+        JOIN conditions cd ON st.condition_id = cd.condition_id
+        LEFT JOIN comics cm ON cl.collectable_id = cm.collectable_id
+        LEFT JOIN comments c ON st.stock_id = c.stock_id
+        WHERE st.in_stock IS True;
