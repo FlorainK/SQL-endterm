@@ -823,12 +823,25 @@ CALL revert_discount(10, NULL);
 
 
 DELIMITER //
-CREATE PROCEDURE create_purchase(IN customer_id INT, IN st_id INT)
+CREATE PROCEDURE create_purchase(IN cs_id INT, IN st_id INT)
 BEGIN
+
+    -- check if customer exists and if stock item is exists and is in stock
+
+    IF (SELECT COUNT(*) FROM customers WHERE customer_id = cs_id) = 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Customer does not exist';
+    END IF;
+
+    IF (SELECT COUNT(*) FROM stock WHERE stock_id = st_id) = 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Stock item does not exist or is not in stock';
+    END IF;
+
     UPDATE stock SET in_stock = False WHERE stock_id = st_id;
-    INSERT INTO sold_items (customer_id, stock_id) VALUES (customer_id, st_id);
+    INSERT INTO sold_items (customer_id, stock_id) VALUES (cs_id, st_id);
+
 END //
 DELIMITER ;
+
 
 CALL create_purchase(1, 29);
 
