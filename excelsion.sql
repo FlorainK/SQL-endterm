@@ -676,3 +676,69 @@ SELECT s.name, COUNT(*) AS sales_count, SUM(selling_price) AS total_amount
     GROUP BY s.storyline_id
     ORDER BY total_amount DESC;
 
+-- from here on some functions
+
+-- function should create new stock idem, and return the new stock id
+-- given parameters are the condition id, buying price, selling price, format, in stock, and the comment
+-- also the function storyline name, publisher, title and if its a comic the issue number
+-- if the storyline and or the collectable does not exist, the function should create a new storyline and or collectable
+-- if its a comic, the function should also create a new collectable idem, and return the new collectable id
+
+
+DELIMITER //
+CREATE FUNCTION create_stock(
+    condition_id DECIMAL(3,1),
+    buying_price DECIMAL(10,2),
+    selling_price DECIMAL(10,2),
+    format VARCHAR(255),
+    in_stock BOOLEAN,
+    comment TEXT,
+    storyline_name VARCHAR(255),
+    publisher VARCHAR(255),
+    title VARCHAR(255),
+    issue_number INT
+)
+RETURNS INT
+BEGIN
+    DECLARE storyline_id INT;
+    DECLARE collectable_id INT;
+    DECLARE new_collectable_id INT;
+    DECLARE stock_id INT;
+
+    -- check if storyline exists
+    SELECT storyline_id INTO storyline_id FROM storylines WHERE name = storyline_name;
+
+    -- if it doesn't exist, create a new one
+    IF storyline_id IS NULL THEN
+        INSERT INTO storylines(name) VALUES (storyline_name);
+        SET storyline_id = LAST_INSERT_ID();
+    END IF;
+
+    -- check if collectable exists
+    SELECT collectable_id INTO collectable_id FROM collectables WHERE title = title AND publisher = publisher AND storyline_id = storyline_id;
+
+    -- if it doesn't exist, create a new one
+    IF collectable_id IS NULL THEN
+        IF issue_number IS NULL THEN
+            INSERT INTO collectables(title, publisher, storyline_id) VALUES (title, publisher, storyline_id);
+        ELSE
+            INSERT INTO collectables(title, publisher, storyline_id) VALUES (title, publisher, storyline_id);
+            SET collectable_id = LAST_INSERT_ID();
+            INSERT INTO comics(collectable_id, issue_number) VALUES (collectable_id, issue_number);
+        END IF;
+        SET collectable_id = LAST_INSERT_ID();
+    END IF;
+
+    -- create new stock item
+    INSERT INTO stock(collectable_id, condition_id, buying_price, selling_price, format, in_stock)
+    VALUES (collectable_id, condition_id, buying_price, selling_price, format, in_stock);
+    SET stock_id = LAST_INSERT_ID();
+
+    -- add comment if given
+    IF comment IS NOT NULL THEN
+        INSERT INTO comments(stock_id, comment) VALUES (stock_id, comment);
+    END IF;
+
+    RETURN stock_id;
+END//
+DELIMITER ;
