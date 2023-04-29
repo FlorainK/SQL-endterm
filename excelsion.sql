@@ -639,7 +639,6 @@ CREATE VIEW best_customers AS
         GROUP BY c.customer_id
         ORDER BY total_spent DESC;
 
-
 --  from here on some queries
 
 -- stan lee comics
@@ -677,28 +676,14 @@ SELECT s.name, COUNT(*) AS sales_count, SUM(selling_price) AS total_amount
 -- from here on some functions
 
 
-
-
-
+-- function to create a storyline if it doesn't already exist
 DELIMITER //
-CREATE FUNCTION create_stock(
-    title VARCHAR(255),
-    condition_id DECIMAL(3,1),
-    buying_price DECIMAL(10,2),
-    selling_price DECIMAL(10,2),
-    format VARCHAR(255),
-    in_stock BOOLEAN,
-    comment TEXT,
-    storyline_name VARCHAR(255),
-    publisher VARCHAR(255),
-    issue_number INT
+CREATE FUNCTION create_storyline(
+    storyline_name VARCHAR(255)
 )
 RETURNS INT DETERMINISTIC
 BEGIN
     DECLARE storyline_id INT;
-    DECLARE collectable_id INT;
-    DECLARE new_collectable_id INT;
-    DECLARE stock_id INT;
 
     -- check if storyline exists
     SELECT storyline_id INTO storyline_id FROM storylines WHERE name = storyline_name;
@@ -708,6 +693,21 @@ BEGIN
         INSERT INTO storylines(name) VALUES (storyline_name);
         SET storyline_id = LAST_INSERT_ID();
     END IF;
+
+    RETURN storyline_id;
+END //
+
+
+-- function to create a collectable if it doesn't already exist
+CREATE FUNCTION create_collectable(
+    title VARCHAR(255),
+    publisher VARCHAR(255),
+    storyline_id INT,
+    issue_number INT
+)
+RETURNS INT DETERMINISTIC
+BEGIN
+    DECLARE collectable_id INT;
 
     -- check if collectable exists
     SELECT collectable_id INTO collectable_id FROM collectables WHERE title = title AND publisher = publisher AND storyline_id = storyline_id LIMIT 1;
@@ -724,22 +724,63 @@ BEGIN
         SET collectable_id = LAST_INSERT_ID();
     END IF;
 
+    RETURN collectable_id;
+END //
+
+-- function to create a comment for a stock item
+
+CREATE PROCEDURE create_comment(
+IN stock_id INT,
+IN comment_text TEXT
+)
+BEGIN
+-- add comment if given
+IF comment_text IS NOT NULL THEN
+INSERT INTO comments(stock_id, comment) VALUES (stock_id, comment_text);
+END IF;
+END //
+
+
+-- main function to create a new stock item
+CREATE FUNCTION create_stock(
+    title VARCHAR(255),
+    condition_id DECIMAL(3,1),
+    buying_price DECIMAL(10,2),
+    selling_price DECIMAL(10,2),
+    format VARCHAR(255),
+    in_stock BOOLEAN,
+    comment_text TEXT,
+    storyline_name VARCHAR(255),
+    publisher VARCHAR(255),
+    issue_number INT
+)
+RETURNS INT DETERMINISTIC
+BEGIN
+    DECLARE storyline_id INT;
+    DECLARE collectable_id INT;
+    DECLARE stock_id INT;
+
+    -- create or retrieve storyline
+    SET storyline_id = create_storyline(storyline_name);
+
+    -- create or retrieve collectable
+    SET collectable_id = create_collectable(title, publisher, storyline_id, issue_number);
+
     -- create new stock item
     INSERT INTO stock(collectable_id, condition_id, buying_price, selling_price, format, in_stock)
     VALUES (collectable_id, condition_id, buying_price, selling_price, format, in_stock);
     SET stock_id = LAST_INSERT_ID();
 
     -- add comment if given
-    IF comment IS NOT NULL THEN
-        INSERT INTO comments(stock_id, comment) VALUES (stock_id, comment);
-    END IF;
+    CALL create_comment(stock_id, comment_text);
 
     RETURN stock_id;
-END//
+END //
+
 DELIMITER ;
 
-SELECT create_stock('The Avengers (1999)', 8.5, 4.5, 19.99, 'paperback', true, NULL, 'The Infinity Gauntlet', 'Marvel', NULL);
 
+SELECT create_stock('The Avengers (1999)', 8.5, 4.5, 19.99, 'paperback', True, NULL, 'The Infinity Gauntlet', 'Marvel', NULL);
 
 
 DELIMITER //
@@ -755,14 +796,30 @@ DELIMITER ;
 
 CALL create_discount(10, NULL);
 
+DELIMITER //
+CREATE PROCEDURE revert_discount(IN discount INT, IN stock_id INT)
+BEGIN
+    DECLARE discount_factor DECIMAL(10, 2);
+
+    SET discount_factor = 1 - (discount / 100);
+
+    IF stock_id IS NULL THEN
+        UPDATE stock SET selling_price = selling_price / discount_factor WHERE in_stock IS True;
+    ELSE
+        UPDATE stock SET selling_price = selling_price / discount_factor WHERE stock_id = stock_id AND in_stock IS True;
+    END IF;
+END //
+DELIMITER ;
+
+CALL revert_discount(10, NULL);
 
 
 
 DELIMITER //
-CREATE PROCEDURE create_purchase(IN customer_id INT, IN stock_id INT)
+CREATE PROCEDURE create_purchase(IN customer_id INT, IN st_id INT)
 BEGIN
-    UPDATE stock SET in_stock = false WHERE stock_id = stock_id;
-    INSERT INTO sold_items (customer_id, stock_id) VALUES (customer_id, stock_id);
+    UPDATE stock SET in_stock = False WHERE stock_id = st_id;
+    INSERT INTO sold_items (customer_id, stock_id) VALUES (customer_id, st_id);
 END //
 DELIMITER ;
 
