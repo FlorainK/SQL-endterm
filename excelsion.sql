@@ -839,11 +839,38 @@ BEGIN
     UPDATE stock SET in_stock = False WHERE stock_id = st_id;
     INSERT INTO sold_items (customer_id, stock_id) VALUES (cs_id, st_id);
 
+    DELETE FROM shopping_cart WHERE stock_id = st_id;
 END //
 DELIMITER ;
 
 
 CALL create_purchase(1, 29);
+
+
+--  trigger to update stock and shopping cart when an item is sold
+DELIMITER //
+CREATE PROCEDURE update_stock_and_cart()
+BEGIN
+    DECLARE sold_stock_id INT;
+    DECLARE sold_customer_id INT;
+
+    SELECT NEW.stock_id, NEW.customer_id INTO sold_stock_id, sold_customer_id;
+
+    -- set the corresponding stock item's in_stock column to false
+    UPDATE stock SET in_stock = FALSE WHERE stock_id = sold_stock_id;
+
+    -- delete the item from all shopping carts
+    DELETE FROM shopping_cart WHERE stock_id = sold_stock_id;
+END //
+
+CREATE TRIGGER sold_items_trigger AFTER INSERT ON sold_items
+FOR EACH ROW
+BEGIN
+    CALL update_stock_and_cart();
+END //
+
+DELIMITER ;
+
 
 
 
