@@ -673,8 +673,15 @@ SELECT s.name, COUNT(*) AS sales_count, SUM(selling_price) AS total_amount
     GROUP BY s.storyline_id
     ORDER BY total_amount DESC;
 
+-- view with wishlist counts
+SELECT st.stock_id, cl.title, cm.issue_number, st.buying_price, st.selling_price, st.format, st.in_stock, COUNT(*) AS wishlist_count
+    FROM stock st
+    JOIN shopping_cart sc ON st.stock_id = sc.stock_id
+    JOIN collectables cl ON st.collectable_id = cl.collectable_id
+    LEFT JOIN comics cm ON cl.collectable_id = cm.collectable_id
+    GROUP BY st.stock_id, cm.issue_number, cl.title, st.buying_price, st.selling_price, st.format, st.in_stock
+    ORDER BY wishlist_count DESC;
 -- from here on some functions
-
 
 -- function to create a storyline if it doesn't already exist
 DELIMITER //
