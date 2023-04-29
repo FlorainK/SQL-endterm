@@ -1,0 +1,156 @@
+% LaTeX Template for short student reports.
+% Citations should be in bibtex format and go in references.bib
+
+\edef\Title{Test title}
+\edef\Author{Test Author}
+\edef\StudentID{123456789}%
+\edef\Mail{test@mail.com}
+
+\documentclass[%
+	a4paper,
+	12pt,				% Schriftgroesse
+	parskip=half,		% Halbe Zeile Abstand zwischen Absätzen.
+	headheight = 12pt,	% Höhe der Kopfzeile
+	listof=totoc,		% Abbildungs-/ Tabellenverzeichnis im Inhaltsverzeichnis darstellen
+	toc=bibliography,	% Literaturverzeichnis im Inhaltsverzeichnis darstellen
+]{scrreprt}
+
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd{\scr@startchapter}{\if@openright\cleardoublepage\else\clearpage\fi}{}{}{}
+\makeatother
+
+\usepackage[top=2cm, bottom=3cm, left = 3cm, right = 3cm]{geometry} 
+\geometry{a4paper} 
+\usepackage[onehalfspacing]{setspace}
+\usepackage[utf8]{inputenc}
+\usepackage{textcomp}
+\usepackage{graphicx} 
+\usepackage{amsmath,amssymb}  
+\usepackage{bm}  
+\usepackage[
+    backend=biber
+]{biblatex}
+\addbibresource{references.bib}
+
+\usepackage[%
+	pdftitle={\Title},
+	pdfauthor={\Author},
+	pdfcreator={pdflatex, LaTeX with KOMA-Script},
+	pdfpagemode=UseOutlines, 		% Beim Oeffnen Inhaltsverzeichnis anzeigen
+	pdfdisplaydoctitle=true, 		% Dokumenttitel statt Dateiname anzeigen.
+	pdflang={en}, 			% Sprache des Dokuments.
+]{hyperref}
+
+\hypersetup{%
+	colorlinks=true, 		% Aktivieren von farbigen Links im Dokument
+	linkcolor=black, 	% Farbe festlegen
+	citecolor=black,
+	filecolor=black,
+	menucolor=black,
+	urlcolor=black,
+	linktocpage=true, 		% Nicht der Text sondern die Seitenzahlen in Verzeichnissen klickbar
+	bookmarksnumbered=true 	% Überschriftsnummerierung im PDF Inhalt anzeigen.
+}
+
+\usepackage{memhfixc} 
+\usepackage{pdfsync}  
+\usepackage{fancyhdr}
+\usepackage{subcaption}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{pgffor}
+
+\clubpenalty = 10000 % schließt Schusterjungen aus (Seitenumbruch nach der ersten Zeile eines neuen Absatzes)
+\widowpenalty = 10000 % schließt Hurenkinder aus (die letzte Zeile eines Absatzes steht auf einer neuen Seite)
+\displaywidowpenalty=10000
+
+\addtokomafont{caption}{\small}
+
+\usepackage{bookmark}
+\usepackage[]{fancyhdr}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\definecolor{ListingBackground}{HTML}{FCF7DE}
+\lstset{%
+    language=sql,		% Standardsprache des Quellcodes
+    numbers=left,			% Zeilennummern links
+    stepnumber=1,			% Jede Zeile nummerieren.
+    numbersep=5pt,			% 5pt Abstand zum Quellcode
+    numberstyle=\tiny,		% Zeichengrösse 'tiny' für die Nummern.
+    breaklines=true,		% Zeilen umbrechen wenn notwendig.
+    breakautoindent=true,	% Nach dem Zeilenumbruch Zeile einrücken.
+    postbreak=\space,		% Bei Leerzeichen umbrechen.
+    tabsize=2,				% Tabulatorgrösse 2
+    basicstyle=\ttfamily\footnotesize, % Nichtproportionale Schrift, klein für den Quellcode
+    showspaces=false,		% Leerzeichen nicht anzeigen.
+    showstringspaces=false,	% Leerzeichen auch in Strings ('') nicht anzeigen.
+    extendedchars=true,		% Alle Zeichen vom Latin1 Zeichensatz anzeigen.
+    captionpos=b,			% sets the caption-position to bottom
+    backgroundcolor=\color{ListingBackground}, % Hintergrundfarbe des Quellcodes setzen.
+    xleftmargin=0pt,		% Rand links
+    xrightmargin=0pt,		% Rand rechts
+    frame=single,			% Rahmen an
+    frameround=ffff,
+    rulecolor=\color{darkgray},	% Rahmenfarbe
+    fillcolor=\color{ListingBackground},
+    keywordstyle=\color[rgb]{0.133,0.133,0.6},
+    commentstyle=\color[rgb]{0.133,0.545,0.133},
+    stringstyle=\color[rgb]{0.627,0.126,0.941}
+}
+
+\setlength{\parindent}{0pt}
+\renewcommand{\thesection}{\arabic{section}}
+
+\pagestyle{plain}
+
+\begin{document}
+
+    \input{titlepage.tex}
+
+    \newpage
+
+    \pagenumbering{Roman}
+
+    \begin{spacing}{1.1}
+		\begingroup
+
+			\renewcommand*{\chapterpagestyle}{empty}
+			\pagestyle{empty}
+
+
+			\setcounter{tocdepth}{2}
+
+			\tableofcontents
+			\clearpage
+		\endgroup
+	\end{spacing}
+
+    \listoffigures
+
+    \cleardoublepage
+
+    \fancyhead{L}{\Title}
+    \pagenumbering{arabic}
+	% Inhalt
+	\foreach \i in {01,02,03,04,05,06,07,08,09,...,99} {%
+		\edef\FileName{content/chapter\i}%
+			\IfFileExists{\FileName}{%
+				\input{\FileName}
+			}
+			{%
+				%file does not exist
+			}
+	}
+
+	\clearpage
+
+	% Literaturverzeichnis
+	\cleardoublepage
+
+    \printbibliography
+\end{document}
