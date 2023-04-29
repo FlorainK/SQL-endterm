@@ -642,16 +642,37 @@ CREATE VIEW best_customers AS
 
 --  from here on some queries
 
-SELECT s.stock_id, c.title,s.condition_id, s.buying_price, s.selling_price, s.format, s.in_stock
+-- stan lee comics
+SELECT s.stock_id, c.title, cm.issue_number, s.condition_id, s.buying_price, s.selling_price, s.format
     FROM stock s
     JOIN collectables c ON s.collectable_id = c.collectable_id
+    JOIN comics cm ON c.collectable_id = cm.collectable_id
     JOIN feature_work f ON c.collectable_id = f.collectable_id
     JOIN creators cr ON f.creator_id = cr.creator_id
     WHERE cr.creator_id = 1
     AND s.in_stock IS True;
 
+-- condition descriptions
 SELECT conditions.textual_condition, MIN(condition_id) AS minimal_rating, MAX(condition_id) AS maximal_rating, condition_description
     FROM conditions
     JOIN condition_descriptions ON conditions.textual_condition = condition_descriptions.textual_condition
     GROUP BY textual_condition
     ORDER BY maximal_rating DESC;
+
+
+-- shows customers who havent bought something in a given time
+SELECT c.first_name, c.last_name, MAX(si.sale_date) AS last_purchase_date, DATEDIFF(CURRENT_DATE, MAX(si.sale_date)) AS days_since_last_purchase
+    FROM customers c
+    JOIN sold_items si ON c.customer_id = si.customer_id
+    GROUP BY c.customer_id
+    HAVING days_since_last_purchase >= 1;
+
+-- sales count and total amount per storyline
+SELECT s.name, COUNT(*) AS sales_count, SUM(selling_price) AS total_amount
+    FROM storylines s
+    JOIN collectables c ON s.storyline_id = c.storyline_id
+    JOIN stock st ON c.collectable_id = st.collectable_id
+    JOIN sold_items si ON st.stock_id = si.stock_id
+    GROUP BY s.storyline_id
+    ORDER BY total_amount DESC;
+
