@@ -78,7 +78,7 @@ CREATE TABLE stock(
     stock_id INT NOT NULL AUTO_INCREMENT,
     collectable_id INT NOT NULL,
     condition_id DECIMAL(3,1) NOT NULL,
-    edition INT NOT NULL,
+    edition INT NOT NULL DEFAULT 1,
     buying_price DECIMAL(10,2) NOT NULL,
     selling_price DECIMAL(10,2) NOT NULL,
     format VARCHAR(255) NOT NULL,
@@ -698,7 +698,7 @@ CREATE FUNCTION create_stock(
     title VARCHAR(255),
     issue_number INT
 )
-RETURNS INT
+RETURNS INT DETERMINISTIC
 BEGIN
     DECLARE storyline_id INT;
     DECLARE collectable_id INT;
@@ -715,7 +715,7 @@ BEGIN
     END IF;
 
     -- check if collectable exists
-    SELECT collectable_id INTO collectable_id FROM collectables WHERE title = title AND publisher = publisher AND storyline_id = storyline_id;
+    SELECT collectable_id INTO collectable_id FROM collectables WHERE title = title AND publisher = publisher AND storyline_id = storyline_id LIMIT 1;
 
     -- if it doesn't exist, create a new one
     IF collectable_id IS NULL THEN
@@ -742,3 +742,5 @@ BEGIN
     RETURN stock_id;
 END//
 DELIMITER ;
+
+SELECT create_stock(8.5, 4.5, 19.99, 'paperback', true, 'good condition', 'Marvel Universe', 'Marvel Comics', 'The Avengers', NULL);
