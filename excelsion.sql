@@ -147,21 +147,21 @@ CREATE TABLE sold_items(
 
 
 INSERT INTO condition_descriptions(textual_condition, condition_description) VALUES
-    ("MT", "Mint:Near perfect in every way. Only the most subtle bindery or printing defects are allowed. Cover is flat with no surface wear. Cover inks are bright with high reflectivity and minimal fading. Corners are cut square and sharp. Staples are generally centered, clean with no rust. Cover is generally well centered and firmly secured to interior pages. Paper is supple and fresh. Spine is tight and flat."),
+    ("MT", "Mint: Near perfect in every way. Only the most subtle bindery or printing defects are allowed. Cover is flat with no surface wear. Cover inks are bright with high reflectivity and minimal fading. Corners are cut square and sharp. Staples are generally centered, clean with no rust. Cover is generally well centered and firmly secured to interior pages. Paper is supple and fresh. Spine is tight and flat."),
     ("NM/MT", "Near-Mint/Mint: A comic book that has enough positive qualities to make it better than a NM, but has enough detracting qualities to keep it from being a MT 9.9."),
-    ("NM", "Near-Mint:Nearly perfect with only minor imperfections allowed. This grade should have no corner of impact creases, stress marks should be almost invisible, and bindery tears must be less than 1/16 inch. A couple of very tiny color flecks, or a combination of the above that keeps the book from being perfect, where the overall eye appeal is less than Mint drops the book into this grade. Only the most subtle binging and/or printing defects allowed. Cover is flat with no surface wear. Cover inks are bright with high reflectivity and minimum of fading. Corners are cut square and sharp with ever so slight blunting permitted. Staples are generally centered, clean with no rust. Cover is well centered and firmly secured to interior pages. Paper is supple and like new. Spine is tight and flat."),
+    ("NM", "Near-Mint: Nearly perfect with only minor imperfections allowed. This grade should have no corner of impact creases, stress marks should be almost invisible, and bindery tears must be less than 1/16 inch. A couple of very tiny color flecks, or a combination of the above that keeps the book from being perfect, where the overall eye appeal is less than Mint drops the book into this grade. Only the most subtle binging and/or printing defects allowed. Cover is flat with no surface wear. Cover inks are bright with high reflectivity and minimum of fading. Corners are cut square and sharp with ever so slight blunting permitted. Staples are generally centered, clean with no rust. Cover is well centered and firmly secured to interior pages. Paper is supple and like new. Spine is tight and flat."),
     ("VF/NM", "Very-Fine/Near-Mint: A cominc book that has enough positive qualities to make it better than VF, but has enough detracting qualities to keep it from being a NM."),
-    ("VF", "An excellent copy with outstanding eye appeal. Sharp, bright and clean with supple pages. Cover is relatively flat with almost no surface wear. Cover inks are generally bright with moderate to high reflectivity. Staples may show some discoloration. Spine may have a couple of almost insignificant transverse stress lines and is almost completely flat. A barely unnoticeable ¼ inch crease is acceptable, if color is not broken. Pages and covers can be yellowish/tannish (at the least, but no brown and will usually be off-white to white)."),
+    ("VF", "An excellent copy with outstanding eye appeal. Sharp, bright and clean with supple pages. Cover is relatively flat with almost no surface wear. Cover inks are generally bright with moderate to high reflectivity. Staples may show some discoloration. Spine may have a couple of almost insignificant transverse stress lines and is almost completely flat. A barely unnoticeable 1/4 inch crease is acceptable, if color is not broken. Pages and covers can be yellowish/tannish (at the least, but no brown and will usually be off-white to white)."),
     ("FN/VF", "Fine/Very-Fine: A cominc book that has enough positive qualities to make it better than F, but has enough detracting qualities to keep it from being a VF."),
-    ("FN", "Fine: An above-average copy that shows minor wear but is still relatively flat and clean with no significant creasing or other serious defects. Eye appeal is somewhat reduced because of slight surface wear and possibly a small defect such as a few slight cross stress marks on spine or a very slight spine split (1/4”). A Fine condition comic book appears to have been read a few times and has been handled with moderate care. Compared to a VF, cover inks are beginning to show a significant reduction in reflectivity, but it is still a highly collectible and desirable book. Pages and interior covers may be tan, but pages must still be fairly supple with no signs of brittleness."),
+    ("FN", "Fine: An above-average copy that shows minor wear but is still relatively flat and clean with no significant creasing or other serious defects. Eye appeal is somewhat reduced because of slight surface wear and possibly a small defect such as a few slight cross stress marks on spine or a very slight spine split 1/4 inch. A Fine condition comic book appears to have been read a few times and has been handled with moderate care. Compared to a VF, cover inks are beginning to show a significant reduction in reflectivity, but it is still a highly collectible and desirable book. Pages and interior covers may be tan, but pages must still be fairly supple with no signs of brittleness."),
     ("VG/FG", "Very Good/Fine: A cominc book that has enough positive qualities to make it better than VG, but has enough detracting qualities to keep it from being a F."),
-    ("VG", "Very Good: The average used comic book. A comic in this grade shows some wear, can have a reading or center crease or a moderately rolled spine, but has not accumulated enough total defects to reduce eye appeal to the point that it is not a desirable copy. Some discoloration, fading and even minor soiling is allowed. As much as a ¼’ triangle can be missing out of the corner or edge. A missing square piece (1/8” by 1/8”) is also acceptable. Store stamps, name stamps, arrival dates, initials, etc. have no effect on this grade. Cover and interior pages can have some minor tears and folds and the centerfold may be detached at one staple. The cover may also be loose, but not completely detached. Common bindery and printing defects do not affect grade. Pages and inside covers may be brown but not brittle. Tape should never be used for comic book repair; however, many VG condition comics have minor tape repair."),
+    ("VG", "Very Good: The average used comic book. A comic in this grade shows some wear, can have a reading or center crease or a moderately rolled spine, but has not accumulated enough total defects to reduce eye appeal to the point that it is not a desirable copy. Some discoloration, fading and even minor soiling is allowed. As much as a 1/4 inch triangle can be missing out of the corner or edge. A missing square piece (1/8inch by 1/8inch) is also acceptable. Store stamps, name stamps, arrival dates, initials, etc. have no effect on this grade. Cover and interior pages can have some minor tears and folds and the centerfold may be detached at one staple. The cover may also be loose, but not completely detached. Common bindery and printing defects do not affect grade. Pages and inside covers may be brown but not brittle. Tape should never be used for comic book repair; however, many VG condition comics have minor tape repair."),
     ("GD/VG", "Good/Very Good: A cominc book that has enough positive qualities to make it better than G, but has enough detracting qualities to keep it from being a VG."),
-    ("GD", "Good: A copy in this grade has all pages and covers, although There may be small pieces missing inside; the largest piece allowed from front or back cover is a ½” triangle or square ¼” by ¼”. Books in this grade are commonly creased, scuffed, abraded, soiled and may have as much as a 2” spine split, but are still completely readable. Often, paper quality is low but not brittle. Cover reflectivity is low, and in some cases, completely absent. This grade can have a moderate accumulation of defects, but still maintains its basic structural integrity."),
+    ("GD", "Good: A copy in this grade has all pages and covers, although There may be small pieces missing inside; the largest piece allowed from front or back cover is a 1/2 inch triangle or square 1/4 inch by 1/4 inch. Books in this grade are commonly creased, scuffed, abraded, soiled and may have as much as a 2 inch spine split, but are still completely readable. Often, paper quality is low but not brittle. Cover reflectivity is low, and in some cases, completely absent. This grade can have a moderate accumulation of defects, but still maintains its basic structural integrity."),
     ("FR/GD", "Fair/Good: A cominc book that has enough positive qualities to make it better than FR, but has enough detracting qualities to keep it from being a G."),
-    ("FR", "Fair: A copy in this grade is usually soiled, ragged, and possibly unattractive. Creases, tears and/or folds are prevalent. Spine may be split up to 2/3rds its entire length. Staples may be gone. Up to 1/10th of the front cover may be missing. These books are readable, although soiling, staining, tears, markings or chunks missing may moderately interfere with reading the complete story. Some collectors consider this the lowest collectible grade because comic books in lesser condition are usually defaced and/or brittle. Very often paper quality is low and may have slight brittleness around the edges, but not in the central portions of the pages. Comic books in this grade may have a clipped coupon, so long as it is noted along side of the nomenclature, i.e.: “Fair (1.0) Coupon Clipped.” Valued at 50-70% of good."),
+    ("FR", "Fair: A copy in this grade is usually soiled, ragged, and possibly unattractive. Creases, tears and/or folds are prevalent. Spine may be split up to 2/3rds its entire length. Staples may be gone. Up to 1/10th of the front cover may be missing. These books are readable, although soiling, staining, tears, markings or chunks missing may moderately interfere with reading the complete story. Some collectors consider this the lowest collectible grade because comic books in lesser condition are usually defaced and/or brittle. Very often paper quality is low and may have slight brittleness around the edges, but not in the central portions of the pages. Comic books in this grade may have a clipped coupon, so long as it is noted along side of the nomenclature, i.e.: Fair (1.0) Coupon Clipped. Valued at 50-70% of good."),
     ("PR/FR", "Poor/Fair: A cominc book that has enough positive qualities to make it better than PR, but has enough detracting qualities to keep it from being a FR."),
-    ("PR", "Poor: Most comic books in this grade have been sufficiently degraded to the point that copies may have extremely severe stains, missing staples, brittleness, mildew or moderate to heavy cover abrasion to the point that some cover inks are indistinct/absent. Comic books in this grade can have small chunks missing and pieces out of pages. They may have been defaced with paints, varnishes, glues, oil, indelible markers or dyes. Covers may be split the entire length of the book, but both halves must be present and basically still there with some chunks missing. A page(s) may be missing as long as it is noted along side of the nomenclature; i.e.: “POOR (0.5) 2nd Page Missing.” Value depends on extent of defects, but would average about 1/3 of GOOD.");
+    ("PR", "Poor: Most comic books in this grade have been sufficiently degraded to the point that copies may have extremely severe stains, missing staples, brittleness, mildew or moderate to heavy cover abrasion to the point that some cover inks are indistinct/absent. Comic books in this grade can have small chunks missing and pieces out of pages. They may have been defaced with paints, varnishes, glues, oil, indelible markers or dyes. Covers may be split the entire length of the book, but both halves must be present and basically still there with some chunks missing. A page(s) may be missing as long as it is noted along side of the nomenclature; i.e.: POOR (0.5) 2nd Page Missing. Value depends on extent of defects, but would average about 1/3 of GOOD.");
 
 
 INSERT INTO conditions(condition_id, textual_condition) VALUES
@@ -271,8 +271,8 @@ INSERT INTO conditions(condition_id, textual_condition) VALUES
 
 
 INSERT INTO storylines(name) VALUES
-    ("Amazing Spider-Man (1999)"), -- 1
-    ("X-Men (1991)"),               -- 2
+    ("Amazing Spider-Man"), -- 1
+    ("X-Men"),               -- 2
     ("The Infinity Gauntlet"),    -- 3
     ("Watchmen"),              -- 4
     ("Batman"), -- 5
@@ -602,13 +602,13 @@ CREATE VIEW extended_shopping_cart AS
 
 
 CREATE VIEW available_stock AS
-    SELECT cl.title, cm.issue_number ,st.condition_id, cd.textual_condition, st.buying_price, st.selling_price, c.comment
-        FROM stock st
-        JOIN collectables cl ON st.collectable_id = cl.collectable_id
-        JOIN conditions cd ON st.condition_id = cd.condition_id
+    SELECT cl.title, cm.issue_number, s.format ,s.condition_id, cd.textual_condition, s.buying_price, s.selling_price, c.comment,s.stock_id, cl.collectable_id
+        FROM stock s
+        JOIN collectables cl ON s.collectable_id = cl.collectable_id
+        JOIN conditions cd ON s.condition_id = cd.condition_id
         LEFT JOIN comics cm ON cl.collectable_id = cm.collectable_id
-        LEFT JOIN comments c ON st.stock_id = c.stock_id
-        WHERE st.in_stock IS True;
+        LEFT JOIN comments c ON s.stock_id = c.stock_id
+        WHERE s.in_stock IS True;
 
 
 CREATE VIEW sold_stock AS
@@ -643,14 +643,12 @@ CREATE VIEW best_customers AS
 --  from here on some queries
 
 -- stan lee comics
-SELECT s.stock_id, c.title, cm.issue_number, s.condition_id, s.buying_price, s.selling_price, s.format
-    FROM stock s
-    JOIN collectables c ON s.collectable_id = c.collectable_id
-    JOIN comics cm ON c.collectable_id = cm.collectable_id
-    JOIN feature_work f ON c.collectable_id = f.collectable_id
-    JOIN creators cr ON f.creator_id = cr.creator_id
-    WHERE cr.creator_id = 1
-    AND s.in_stock IS True;
+SELECT avs.stock_id, avs.title, avs.format, avs.issue_number, avs.condition_id, avs.textual_condition, avs.selling_price, avs.comment
+    FROM available_stock avs
+    JOIN feature_work fw ON fw.collectable_id = avs.collectable_id
+    WHERE fw.creator_id = 1;
+
+
 
 -- condition descriptions
 SELECT conditions.textual_condition, MIN(condition_id) AS minimal_rating, MAX(condition_id) AS maximal_rating, condition_description
@@ -678,15 +676,13 @@ SELECT s.name, COUNT(*) AS sales_count, SUM(selling_price) AS total_amount
 
 -- from here on some functions
 
--- function should create new stock idem, and return the new stock id
--- given parameters are the condition id, buying price, selling price, format, in stock, and the comment
--- also the function storyline name, publisher, title and if its a comic the issue number
--- if the storyline and or the collectable does not exist, the function should create a new storyline and or collectable
--- if its a comic, the function should also create a new collectable idem, and return the new collectable id
+
+
 
 
 DELIMITER //
 CREATE FUNCTION create_stock(
+    title VARCHAR(255),
     condition_id DECIMAL(3,1),
     buying_price DECIMAL(10,2),
     selling_price DECIMAL(10,2),
@@ -695,7 +691,6 @@ CREATE FUNCTION create_stock(
     comment TEXT,
     storyline_name VARCHAR(255),
     publisher VARCHAR(255),
-    title VARCHAR(255),
     issue_number INT
 )
 RETURNS INT DETERMINISTIC
@@ -743,4 +738,39 @@ BEGIN
 END//
 DELIMITER ;
 
-SELECT create_stock(8.5, 4.5, 19.99, 'paperback', true, 'good condition', 'Marvel Universe', 'Marvel Comics', 'The Avengers', NULL);
+SELECT create_stock('The Avengers (1999)', 8.5, 4.5, 19.99, 'paperback', true, NULL, 'The Infinity Gauntlet', 'Marvel', NULL);
+
+
+
+DELIMITER //
+CREATE PROCEDURE create_discount(IN discount DECIMAL(5,2), IN stock_id INT)
+BEGIN
+    IF stock_id IS NULL THEN
+        UPDATE stock SET selling_price = selling_price * (1 - discount / 100) WHERE in_stock IS TRUE;
+    ELSE
+        UPDATE stock SET selling_price = selling_price * (100 - discount/100) WHERE stock_id = stock_id AND in_stock IS TRUE;
+    END IF;
+END //
+DELIMITER ;
+
+CALL create_discount(10, NULL);
+
+
+
+
+DELIMITER //
+CREATE PROCEDURE create_purchase(IN customer_id INT, IN stock_id INT)
+BEGIN
+    UPDATE stock SET in_stock = false WHERE stock_id = stock_id;
+    INSERT INTO sold_items (customer_id, stock_id) VALUES (customer_id, stock_id);
+END //
+DELIMITER ;
+
+CALL create_purchase(1, 29);
+
+
+
+
+
+
+
