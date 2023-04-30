@@ -52,7 +52,7 @@ CREATE TABLE characters(
     PRIMARY KEY(character_id)
 );
 
-CREATE TABLE character_appearings(
+CREATE TABLE character_appearances(
     character_appearing_id INT NOT NULL AUTO_INCREMENT,
     character_id INT NOT NULL,
     collectable_id INT NOT NULL,
@@ -356,7 +356,7 @@ INSERT INTO characters(character_name, character_profession) VALUES
     ("Sandman", "Superhero"), -- 15
     ("Hellboy", "Superhero"); -- 16
 
-INSERT INTO character_appearings(character_id, collectable_id) VALUES
+INSERT INTO character_appearances(character_id, collectable_id) VALUES
     (1, 1), -- spiderman -> spiderman(1999) #1
     (1, 2), -- spiderman -> spiderman(1999) #2
     (1, 3), -- spiderman -> spiderman(1999) #3
@@ -622,12 +622,12 @@ CREATE VIEW sold_stock AS
         JOIN customers cst ON si.customer_id = cst.customer_id;
 
 
-CREATE VIEW storyline_character_appearings AS
+CREATE VIEW storyline_character_appearances AS
     SELECT storylines.name, character_name, COUNT(*) AS num_appearances
-    FROM character_appearings
-    JOIN collectables ON character_appearings.collectable_id = collectables.collectable_id
+    FROM character_appearances
+    JOIN collectables ON character_appearances.collectable_id = collectables.collectable_id
     JOIN storylines ON collectables.storyline_id = storylines.storyline_id
-    JOIN characters ON character_appearings.character_id = characters.character_id
+    JOIN characters ON character_appearances.character_id = characters.character_id
     GROUP BY storylines.storyline_id, characters.character_id
     ORDER BY name ASC;
 
