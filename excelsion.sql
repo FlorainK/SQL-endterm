@@ -4,27 +4,19 @@ CREATE DATABASE excelsior;
 
 USE excelsior;
 
-CREATE TABLE storylines(
-    storyline_id INT NOT NULL AUTO_INCREMENT,
-    name VARCHAR(255) NOT NULL,
-    PRIMARY KEY(storyline_id)
-);
 
 CREATE TABLE collectables(
     collectable_id INT NOT NULL AUTO_INCREMENT,
     title VARCHAR(255) NOT NULL,
     publisher VARCHAR(255) NOT NULL,
-    storyline_id INT NOT NULL,
-    PRIMARY KEY(collectable_id),
-    FOREIGN KEY(storyline_id) REFERENCES storylines(storyline_id)
+    PRIMARY KEY(collectable_id)
 );
 
 
 CREATE TABLE comics(
-    comic_id INT NOT NULL AUTO_INCREMENT,
     collectable_id INT NOT NULL,
     issue_number INT NOT NULL,
-    PRIMARY KEY(comic_id),
+    PRIMARY KEY(collectable_id),
     FOREIGN KEY(collectable_id) REFERENCES collectables(collectable_id) ON DELETE CASCADE
 );
 
@@ -89,10 +81,9 @@ CREATE TABLE stock(
 );
 
 CREATE TABLE comments(
-    comment_id INT NOT NULL AUTO_INCREMENT,
     stock_id INT NOT NULL,
     comment TEXT NOT NULL,
-    PRIMARY KEY(comment_id),
+    PRIMARY KEY(stock_id),
     FOREIGN KEY(stock_id) REFERENCES stock(stock_id) ON DELETE CASCADE
 );
 
@@ -134,11 +125,10 @@ CREATE TABLE shopping_cart(
 );
 
 CREATE TABLE sold_items(
-    sold_item_id INT NOT NULL AUTO_INCREMENT,
-    customer_id INT NOT NULL,
     stock_id INT NOT NULL,
+    customer_id INT NOT NULL,
     sale_date DATE NOT NULL DEFAULT (CURRENT_DATE),
-    PRIMARY KEY(sold_item_id),
+    PRIMARY KEY(stock_id),
     FOREIGN KEY(customer_id) REFERENCES customers(customer_id),
     FOREIGN KEY(stock_id) REFERENCES stock(stock_id)
 );
@@ -270,48 +260,37 @@ INSERT INTO conditions(condition_id, textual_condition) VALUES
 
 
 
-INSERT INTO storylines(name) VALUES
-    ("Amazing Spider-Man"), -- 1
-    ("X-Men"),               -- 2
-    ("The Infinity Gauntlet"),    -- 3
-    ("Watchmen"),              -- 4
-    ("Batman"), -- 5
-    ("V for Vendetta"), -- 6
-    ("East of West"), -- 7
-    ("Hawkeye"), -- 8
-    ("The Sandman"), -- 9
-    ("Hellboy"); -- 10
-INSERT INTO collectables(title, publisher, storyline_id) VALUES
-    ("Amazing Spider-Man (1999)", "Marvel", 1), -- 1
-    ("Amazing Spider-Man (1999)", "Marvel", 1), -- 2
-    ("Amazing Spider-Man (1999)", "Marvel", 1), -- 3
-    ("Amazing Spider-Man (1999)", "Marvel", 1), -- 4
-    ("Amazing Spider-Man (1999)", "Marvel", 1), -- 5
+INSERT INTO collectables(title, publisher) VALUES
+    ("Amazing Spider-Man (1999)", "Marvel"), -- 1
+    ("Amazing Spider-Man (1999)", "Marvel"), -- 2
+    ("Amazing Spider-Man (1999)", "Marvel"), -- 3
+    ("Amazing Spider-Man (1999)", "Marvel"), -- 4
+    ("Amazing Spider-Man (1999)", "Marvel"), -- 5
 
     -- some xmen comics
-    ("X-Men (1991)", "Marvel", 2), -- 6
-    ("X-Men (1991)", "Marvel", 2), -- 7
-    ("X-Men (1991)", "Marvel", 2), -- 8
-    ("X-Men (1991)", "Marvel", 2), -- 9
+    ("X-Men (1991)", "Marvel"), -- 6
+    ("X-Men (1991)", "Marvel"), -- 7
+    ("X-Men (1991)", "Marvel"), -- 8
+    ("X-Men (1991)", "Marvel"), -- 9
 
     -- some graphic novels
-    ("The Infinity Gauntlet", "Marvel", 3), -- 10
-    ("Watchmen", "DC Comics", 4),          -- 11
-    ("Batman: The Dark Knight Returns", "DC Comics", 5), -- 12
-    ("V for Vendetta", "DC Comics", 6), -- 13
+    ("The Infinity Gauntlet", "Marvel"), -- 10
+    ("Watchmen", "DC Comics"),          -- 11
+    ("Batman: The Dark Knight Returns", "DC Comics"), -- 12
+    ("V for Vendetta", "DC Comics"), -- 13
 
     -- some dc comics
-    ("Batman: The Dark Knight (2011)", "DC Comics", 5), -- 14
-    ("V for Vendetta (1988)", "DC Comics", 6), -- 15
-    ("V for Vendetta (1988)", "DC Comics", 6), -- 16
-    ("V for Vendetta (1988)", "DC Comics", 6), -- 17
+    ("Batman: The Dark Knight (2011)", "DC Comics"), -- 14
+    ("V for Vendetta (1988)", "DC Comics"), -- 15
+    ("V for Vendetta (1988)", "DC Comics"), -- 16
+    ("V for Vendetta (1988)", "DC Comics"), -- 17
 
     -- some more graphic novels
-    ("East of West (2013)", "Image Comics", 7), -- 18
-    ("Old Man Hawkeye (2018)", "Marvel", 8), -- 19
-    ("The Sandman: Season of Mists (1990)", "DC Comics", 9), -- 20
-    ("Hellboy: The Chained Coffin and Others (1998)", "Dark Horse Comics", 10), -- 21
-    ("Batman: The Black Mirror (2011)", "DC Comics", 5); -- 22
+    ("East of West (2013)", "Image Comics"), -- 18
+    ("Old Man Hawkeye (2018)", "Marvel"), -- 19
+    ("The Sandman: Season of Mists (1990)", "DC Comics"), -- 20
+    ("Hellboy: The Chained Coffin and Others (1998)", "Dark Horse Comics"), -- 21
+    ("Batman: The Black Mirror (2011)", "DC Comics"); -- 22
 
 
 
@@ -621,15 +600,6 @@ CREATE VIEW sold_stock AS
         JOIN sold_items si ON st.stock_id = si.stock_id
         JOIN customers cst ON si.customer_id = cst.customer_id;
 
-
-CREATE VIEW storyline_character_appearances AS
-    SELECT storylines.name, character_name, COUNT(*) AS num_appearances
-    FROM character_appearances
-    JOIN collectables ON character_appearances.collectable_id = collectables.collectable_id
-    JOIN storylines ON collectables.storyline_id = storylines.storyline_id
-    JOIN characters ON character_appearances.character_id = characters.character_id
-    GROUP BY storylines.storyline_id, characters.character_id
-    ORDER BY name ASC;
 
 CREATE VIEW best_customers AS
     SELECT c.customer_id, CONCAT(c.first_name, ' ', c.last_name) AS customer_name, SUM(selling_price) AS total_spent
