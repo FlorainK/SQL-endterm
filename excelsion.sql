@@ -540,14 +540,14 @@ INSERT INTO stock(collectable_id, condition_id, edition, buying_price, selling_p
     (3, 6.3, 1, 9580.67, 11975.84, "paperback", True ), -- stock_id: 4
     (4, 9.0, 1, 6174.97, 7718.71, "paperback", True ), -- stock_id: 5
     (4, 3.7, 1, 7650.70, 9563.38, "paperback", True ), -- stock_id: 6
-    (5, 10.0, 1, 2012.67, 2515.84, "paperback, jumbo sized cover", False ), -- stock_id: 7
-    (6, 0.3, 1, 9121.51, 11401.89, "paperback, jumbo sized cover", False ), -- stock_id: 8
-    (7, 2.0, 1, 8986.38, 11232.97, "paperback, jumbo sized cover", True ), -- stock_id: 9
+    (5, 10.0, 1, 2012.67, 2515.84, "paperback", False ), -- stock_id: 7
+    (6, 0.3, 1, 9121.51, 11401.89, "paperback", False ), -- stock_id: 8
+    (7, 2.0, 1, 8986.38, 11232.97, "paperback", True ), -- stock_id: 9
     (8, 1.2, 1, 6736.53, 8420.66, "paperback", True ), -- stock_id: 10
-    (9, 1.3, 1, 600.78, 750.97, "paperback, jumbo sized cover", True ), -- stock_id: 11
+    (9, 1.3, 1, 600.78, 750.97, "paperback", True ), -- stock_id: 11
     (9, 0.5, 1, 1932.36, 2415.45, "paperback", False ), -- stock_id: 12
-    (10, 3.0, 1, 1341.74, 1677.17, "paperback, jumbo sized cover", True ), -- stock_id: 13
-    (11, 9.3, 1, 2550.64, 3188.30, "paperback, jumbo sized cover", True ), -- stock_id: 14
+    (10, 3.0, 1, 1341.74, 1677.17, "paperback", True ), -- stock_id: 13
+    (11, 9.3, 1, 2550.64, 3188.30, "paperback", True ), -- stock_id: 14
     (11, 1.1, 1, 9442.03, 11802.54, "hardcover", True ), -- stock_id: 15
     (12, 5.0, 1, 4087.74, 5109.67, "hardcover", True ), -- stock_id: 16
     (13, 8.9, 1, 460.50, 5763.12, "hardcover", False ), -- stock_id: 17
@@ -618,15 +618,6 @@ INSERT INTO shopping_cart(customer_id, stock_id) VALUES
 
 --
 
-CREATE VIEW extended_shopping_cart AS
-    SELECT cl.title, cm.issue_number, st.format, st.condition_id, cd.textual_condition, st.buying_price, st.selling_price, cst.first_name, cst.last_name
-        FROM stock st
-        JOIN shopping_cart sc ON st.stock_id = sc.stock_id
-        JOIN collectables cl ON st.collectable_id = cl.collectable_id
-        JOIN conditions cd ON st.condition_id = cd.condition_id
-        JOIN customers cst ON sc.customer_id = cst.customer_id
-        LEFT JOIN comics cm ON cl.collectable_id = cm.collectable_id;
-
 CREATE VIEW available_stock AS
     SELECT cl.title,cl.publication_year, cm.issue_number, s.format ,s.condition_id, cd.textual_condition, s.buying_price, s.selling_price, c.comment,s.stock_id, cl.collectable_id
     FROM stock s
@@ -635,6 +626,17 @@ CREATE VIEW available_stock AS
     LEFT JOIN comics cm ON cl.collectable_id = cm.collectable_id
     LEFT JOIN comments c ON s.stock_id = c.stock_id
     WHERE s.in_stock = True;
+
+CREATE VIEW extended_shopping_cart AS
+    SELECT avs.title, avs.publication_year, avs.issue_number, avs.format, avs.condition_id, avs.textual_condition, avs.buying_price, avs.selling_price, cst.first_name, cst.last_name, avs.stock_id
+        FROM available_stock avs
+        JOIN shopping_cart sc ON avs.stock_id = sc.stock_id
+        JOIN customers cst ON sc.customer_id = cst.customer_id;
+
+SELECT esc.title, esc.publication_year, esc.issue_number, esc.format, esc.textual_condition, esc.buying_price, esc.selling_price, COUNT(*) AS num_shopping_carts
+    FROM extended_shopping_cart esc
+    GROUP BY esc.stock_id;
+    ;
 
 CREATE VIEW storyline_character_appearances AS
     SELECT s.storyline_title AS name, c.character_name, COUNT(*) AS num_appearances
@@ -648,14 +650,14 @@ CREATE VIEW storyline_character_appearances AS
 
 
 CREATE VIEW sold_stock AS
-    SELECT cl.title,cl.publication_year, cm.issue_number ,st.condition_id, cd.textual_condition, st.buying_price, st.selling_price, c.comment, cst.first_name, cst.last_name
-        FROM stock st
-        JOIN collectables cl ON st.collectable_id = cl.collectable_id
-        JOIN conditions cd ON st.condition_id = cd.condition_id
-        LEFT JOIN comics cm ON cl.collectable_id = cm.collectable_id
-        LEFT JOIN comments c ON st.stock_id = c.stock_id
-        JOIN sold_items si ON st.stock_id = si.stock_id
-        JOIN customers cst ON si.customer_id = cst.customer_id;
+        SELECT cl.title,cl.publication_year, cm.issue_number ,st.condition_id, cd.textual_condition, st.buying_price, st.selling_price, c.comment, cst.first_name, cst.last_name, si.sale_date
+            FROM stock st
+            JOIN collectables cl ON st.collectable_id = cl.collectable_id
+            JOIN conditions cd ON st.condition_id = cd.condition_id
+            LEFT JOIN comics cm ON cl.collectable_id = cm.collectable_id
+            LEFT JOIN comments c ON st.stock_id = c.stock_id
+            JOIN sold_items si ON st.stock_id = si.stock_id
+            JOIN customers cst ON si.customer_id = cst.customer_id;
 
 
 CREATE VIEW best_customers AS
