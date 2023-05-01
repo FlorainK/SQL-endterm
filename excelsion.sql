@@ -4,6 +4,10 @@ CREATE DATABASE excelsior;
 
 USE excelsior;
 
+CREATE TABLE storylines(
+    storyline_title VARCHAR(255) NOT NULL,
+    PRIMARY KEY(storyline_title)
+);
 
 CREATE TABLE collectables(
     collectable_id INT NOT NULL AUTO_INCREMENT,
@@ -12,6 +16,14 @@ CREATE TABLE collectables(
     PRIMARY KEY(collectable_id)
 );
 
+CREATE Table storyline_mappings(
+    mapping_id INT NOT NULL AUTO_INCREMENT,
+    storyline_title VARCHAR(255) NOT NULL,
+    collectable_id INT NOT NULL,
+    PRIMARY KEY(mapping_id),
+    FOREIGN KEY(storyline_title) REFERENCES storylines(storyline_title) ON DELETE CASCADE,
+    FOREIGN KEY(collectable_id) REFERENCES collectables(collectable_id) ON DELETE CASCADE
+);
 
 CREATE TABLE comics(
     collectable_id INT NOT NULL,
@@ -258,7 +270,17 @@ INSERT INTO conditions(condition_id, textual_condition) VALUES
     (10.0, "MT");
 
 
-
+INSERT INTO storylines(storyline_title) VALUES
+    ("Amazing Spider-Man"), -- 1
+    ("X-Men"),               -- 2
+    ("The Infinity Gauntlet"),    -- 3
+    ("Watchmen"),              -- 4
+    ("Batman"), -- 5
+    ("V for Vendetta"), -- 6
+    ("East of West"), -- 7
+    ("Hawkeye"), -- 8
+    ("The Sandman"), -- 9
+    ("Hellboy"); -- 10
 
 INSERT INTO collectables(title, publisher) VALUES
     ("Amazing Spider-Man (1999)", "Marvel"), -- 1
@@ -292,6 +314,32 @@ INSERT INTO collectables(title, publisher) VALUES
     ("Hellboy: The Chained Coffin and Others (1998)", "Dark Horse Comics"), -- 21
     ("Batman: The Black Mirror (2011)", "DC Comics"); -- 22
 
+
+
+
+INSERT INTO storyline_mappings(storyline_title, collectable_id) VALUES
+    ("Amazing Spider-Man", 1),
+    ("Amazing Spider-Man", 2),
+    ("Amazing Spider-Man", 3),
+    ("Amazing Spider-Man", 4),
+    ("Amazing Spider-Man", 5),
+    ("X-Men", 6),
+    ("X-Men", 7),
+    ("X-Men", 8),
+    ("X-Men", 9),
+    ("The Infinity Gauntlet", 10),
+    ("Watchmen", 11),
+    ("Batman", 12),
+    ("V for Vendetta", 13),
+    ("Batman", 14),
+    ("V for Vendetta", 15),
+    ("V for Vendetta", 16),
+    ("V for Vendetta", 17),
+    ("East of West", 18),
+    ("Hawkeye", 19),
+    ("The Sandman", 20),
+    ("Hellboy", 21),
+    ("Batman", 22);
 
 
 
@@ -569,9 +617,8 @@ INSERT INTO shopping_cart(customer_id, stock_id) VALUES
 
 --
 
--- from here on some views
 CREATE VIEW extended_shopping_cart AS
-    SELECT cl.title, cm.issue_number ,st.condition_id, cd.textual_condition, st.buying_price, st.selling_price, cst.first_name, cst.last_name
+    SELECT cl.title, cm.issue_number, st.format, st.condition_id, cd.textual_condition, st.buying_price, st.selling_price, cst.first_name, cst.last_name
         FROM stock st
         JOIN shopping_cart sc ON st.stock_id = sc.stock_id
         JOIN collectables cl ON st.collectable_id = cl.collectable_id
@@ -579,15 +626,24 @@ CREATE VIEW extended_shopping_cart AS
         JOIN customers cst ON sc.customer_id = cst.customer_id
         LEFT JOIN comics cm ON cl.collectable_id = cm.collectable_id;
 
-
 CREATE VIEW available_stock AS
     SELECT cl.title, cm.issue_number, s.format ,s.condition_id, cd.textual_condition, s.buying_price, s.selling_price, c.comment,s.stock_id, cl.collectable_id
-        FROM stock s
-        JOIN collectables cl ON s.collectable_id = cl.collectable_id
-        JOIN conditions cd ON s.condition_id = cd.condition_id
-        LEFT JOIN comics cm ON cl.collectable_id = cm.collectable_id
-        LEFT JOIN comments c ON s.stock_id = c.stock_id
-        WHERE s.in_stock IS True;
+    FROM stock s
+    JOIN collectables cl ON s.collectable_id = cl.collectable_id
+    JOIN conditions cd ON s.condition_id = cd.condition_id
+    LEFT JOIN comics cm ON cl.collectable_id = cm.collectable_id
+    LEFT JOIN comments c ON s.stock_id = c.stock_id
+    WHERE s.in_stock = True;
+
+CREATE VIEW storyline_character_appearances AS
+    SELECT s.storyline_title AS name, c.character_name, COUNT(*) AS num_appearances
+    FROM character_appearances ca
+    JOIN collectables co ON ca.collectable_id = co.collectable_id
+    JOIN storyline_mappings sm ON co.collectable_id = sm.collectable_id
+    JOIN storylines s ON sm.storyline_title = s.storyline_title
+    JOIN characters c ON ca.character_id = c.character_id
+    GROUP BY s.storyline_title, c.character_id
+    ORDER BY name ASC;
 
 
 CREATE VIEW sold_stock AS
@@ -618,7 +674,6 @@ SELECT avs.stock_id, avs.title, avs.format, avs.issue_number, avs.condition_id, 
     WHERE fw.creator_id = 1;
 
 
-
 -- condition descriptions
 SELECT conditions.textual_condition, MIN(condition_id) AS minimal_rating, MAX(condition_id) AS maximal_rating, condition_description
     FROM conditions
@@ -632,21 +687,22 @@ SELECT c.first_name, c.last_name, MAX(si.sale_date) AS last_purchase_date, DATED
     FROM customers c
     JOIN sold_items si ON c.customer_id = si.customer_id
     GROUP BY c.customer_id
-    HAVING days_since_last_purchase >= 1;
+    HAVING days_since_last_purchase >= 0;
 
 -- sales count and total amount per storyline
-SELECT s.name, COUNT(*) AS sales_count, SUM(selling_price) AS total_amount
+SELECT s.storyline_title, COUNT(*) AS sales_count, SUM(st.selling_price) AS total_amount
     FROM storylines s
-    JOIN collectables c ON s.storyline_id = c.storyline_id
+    JOIN storyline_mappings sm ON s.storyline_title = sm.storyline_title
+    JOIN collectables c ON sm.collectable_id = c.collectable_id
     JOIN stock st ON c.collectable_id = st.collectable_id
     JOIN sold_items si ON st.stock_id = si.stock_id
-    GROUP BY s.storyline_id
+    GROUP BY s.storyline_title
     ORDER BY total_amount DESC;
 
 -- view with wishlist counts
 SELECT st.stock_id, cl.title, cm.issue_number, st.buying_price, st.selling_price, st.format, st.in_stock, COUNT(*) AS wishlist_count
     FROM stock st
-    JOIN shopping_cart sc ON st.stock_id = sc.stock_id
+    JOIN wishlist w ON st.stock_id = w.stock_id
     JOIN collectables cl ON st.collectable_id = cl.collectable_id
     LEFT JOIN comics cm ON cl.collectable_id = cm.collectable_id
     GROUP BY st.stock_id, cm.issue_number, cl.title, st.buying_price, st.selling_price, st.format, st.in_stock
@@ -655,23 +711,15 @@ SELECT st.stock_id, cl.title, cm.issue_number, st.buying_price, st.selling_price
 
 -- function to create a storyline if it doesn't already exist
 DELIMITER //
-CREATE FUNCTION create_storyline(
+CREATE PROCEDURE create_storyline(
     storyline_name VARCHAR(255)
 )
-RETURNS INT DETERMINISTIC
 BEGIN
-    DECLARE storyline_id INT;
 
-    -- check if storyline exists
-    SELECT storyline_id INTO storyline_id FROM storylines WHERE name = storyline_name;
-
-    -- if it doesn't exist, create a new one
-    IF storyline_id IS NULL THEN
-        INSERT INTO storylines(name) VALUES (storyline_name);
-        SET storyline_id = LAST_INSERT_ID();
+    -- check if storyline exists if it doesn't exist, create a new one
+    IF (SELECT * FROM storylines WHERE name = storyline_name) = NULL THEN
+        INSERT INTO storylines(storyline_name) VALUES (storyline_name);
     END IF;
-
-    RETURN storyline_id;
 END //
 
 
@@ -819,7 +867,7 @@ CALL create_purchase(1, 29);
 
 --  trigger to update stock and shopping cart when an item is sold
 DELIMITER //
-CREATE PROCEDURE update_stock_and_cart()
+CREATE PROCEDURE update_stock_and_carts()
 BEGIN
     DECLARE sold_stock_id INT;
     DECLARE sold_customer_id INT;
