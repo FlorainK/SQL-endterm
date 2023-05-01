@@ -12,6 +12,7 @@ CREATE TABLE storylines(
 CREATE TABLE collectables(
     collectable_id INT NOT NULL AUTO_INCREMENT,
     title VARCHAR(255) NOT NULL,
+    publication_year INT NOT NULL,
     publisher VARCHAR(255) NOT NULL,
     PRIMARY KEY(collectable_id)
 );
@@ -282,37 +283,37 @@ INSERT INTO storylines(storyline_title) VALUES
     ("The Sandman"), -- 9
     ("Hellboy"); -- 10
 
-INSERT INTO collectables(title, publisher) VALUES
-    ("Amazing Spider-Man (1999)", "Marvel"), -- 1
-    ("Amazing Spider-Man (1999)", "Marvel"), -- 2
-    ("Amazing Spider-Man (1999)", "Marvel"), -- 3
-    ("Amazing Spider-Man (1999)", "Marvel"), -- 4
-    ("Amazing Spider-Man (1999)", "Marvel"), -- 5
+INSERT INTO collectables(title, publication_year, publisher) VALUES
+    ("Amazing Spider-Man",1999, "Marvel"), -- 1
+    ("Amazing Spider-Man",1999, "Marvel"), -- 2
+    ("Amazing Spider-Man",1999, "Marvel"), -- 3
+    ("Amazing Spider-Man",1999, "Marvel"), -- 4
+    ("Amazing Spider-Man",1999, "Marvel"), -- 5
 
     -- some xmen comics
-    ("X-Men (1991)", "Marvel"), -- 6
-    ("X-Men (1991)", "Marvel"), -- 7
-    ("X-Men (1991)", "Marvel"), -- 8
-    ("X-Men (1991)", "Marvel"), -- 9
+    ("X-Men",1991, "Marvel"), -- 6
+    ("X-Men",1991, "Marvel"), -- 7
+    ("X-Men",1991, "Marvel"), -- 8
+    ("X-Men",1991, "Marvel"), -- 9
 
     -- some graphic novels
-    ("The Infinity Gauntlet", "Marvel"), -- 10
-    ("Watchmen", "DC Comics"),          -- 11
-    ("Batman: The Dark Knight Returns", "DC Comics"), -- 12
-    ("V for Vendetta", "DC Comics"), -- 13
+    ("The Infinity Gauntlet",2000, "Marvel"), -- 10
+    ("Watchmen",2003, "DC Comics"),          -- 11
+    ("Batman: The Dark Knight Returns", 1980, "DC Comics"), -- 12
+    ("V for Vendetta", 1987, "DC Comics"), -- 13
 
     -- some dc comics
-    ("Batman: The Dark Knight (2011)", "DC Comics"), -- 14
-    ("V for Vendetta (1988)", "DC Comics"), -- 15
-    ("V for Vendetta (1988)", "DC Comics"), -- 16
-    ("V for Vendetta (1988)", "DC Comics"), -- 17
+    ("Batman: The Dark Knight", 2011, "DC Comics"), -- 14
+    ("V for Vendetta",1988, "DC Comics"), -- 15
+    ("V for Vendetta",1988, "DC Comics"), -- 16
+    ("V for Vendetta",1988, "DC Comics"), -- 17
 
     -- some more graphic novels
-    ("East of West (2013)", "Image Comics"), -- 18
-    ("Old Man Hawkeye (2018)", "Marvel"), -- 19
-    ("The Sandman: Season of Mists (1990)", "DC Comics"), -- 20
-    ("Hellboy: The Chained Coffin and Others (1998)", "Dark Horse Comics"), -- 21
-    ("Batman: The Black Mirror (2011)", "DC Comics"); -- 22
+    ("East of West",2013, "Image Comics"), -- 18
+    ("Old Man Hawkeye",2018, "Marvel"), -- 19
+    ("The Sandman: Season of Mists",1990, "DC Comics"), -- 20
+    ("Hellboy: The Chained Coffin and Others",1998, "Dark Horse Comics"), -- 21
+    ("Batman: The Black Mirror",2011, "DC Comics"); -- 22
 
 
 
@@ -627,7 +628,7 @@ CREATE VIEW extended_shopping_cart AS
         LEFT JOIN comics cm ON cl.collectable_id = cm.collectable_id;
 
 CREATE VIEW available_stock AS
-    SELECT cl.title, cm.issue_number, s.format ,s.condition_id, cd.textual_condition, s.buying_price, s.selling_price, c.comment,s.stock_id, cl.collectable_id
+    SELECT cl.title,cl.publication_year, cm.issue_number, s.format ,s.condition_id, cd.textual_condition, s.buying_price, s.selling_price, c.comment,s.stock_id, cl.collectable_id
     FROM stock s
     JOIN collectables cl ON s.collectable_id = cl.collectable_id
     JOIN conditions cd ON s.condition_id = cd.condition_id
@@ -647,7 +648,7 @@ CREATE VIEW storyline_character_appearances AS
 
 
 CREATE VIEW sold_stock AS
-    SELECT cl.title, cm.issue_number ,st.condition_id, cd.textual_condition, st.buying_price, st.selling_price, c.comment, cst.first_name, cst.last_name
+    SELECT cl.title,cl.publication_year, cm.issue_number ,st.condition_id, cd.textual_condition, st.buying_price, st.selling_price, c.comment, cst.first_name, cst.last_name
         FROM stock st
         JOIN collectables cl ON st.collectable_id = cl.collectable_id
         JOIN conditions cd ON st.condition_id = cd.condition_id
@@ -668,7 +669,7 @@ CREATE VIEW best_customers AS
 --  from here on some queries
 
 -- stan lee comics
-SELECT avs.stock_id, avs.title, avs.format, avs.issue_number, avs.condition_id, avs.textual_condition, avs.selling_price, avs.comment
+SELECT avs.stock_id, avs.title, avs.publication_year, avs.format, avs.issue_number, avs.condition_id, avs.textual_condition, avs.selling_price, avs.comment
     FROM available_stock avs
     JOIN feature_work fw ON fw.collectable_id = avs.collectable_id
     WHERE fw.creator_id = 1;
@@ -700,7 +701,7 @@ SELECT s.storyline_title, COUNT(*) AS sales_count, SUM(st.selling_price) AS tota
     ORDER BY total_amount DESC;
 
 -- view with wishlist counts
-SELECT st.stock_id, cl.title, cm.issue_number, st.buying_price, st.selling_price, st.format, st.in_stock, COUNT(*) AS wishlist_count
+SELECT st.stock_id, cl.title,cl.publication_year, cm.issue_number, st.buying_price, st.selling_price, st.format, st.in_stock, COUNT(*) AS wishlist_count
     FROM stock st
     JOIN wishlist w ON st.stock_id = w.stock_id
     JOIN collectables cl ON st.collectable_id = cl.collectable_id
@@ -710,39 +711,36 @@ SELECT st.stock_id, cl.title, cm.issue_number, st.buying_price, st.selling_price
 -- from here on some functions
 
 -- function to create a storyline if it doesn't already exist
-DELIMITER //
-CREATE PROCEDURE create_storyline(
-    storyline_name VARCHAR(255)
-)
-BEGIN
 
-    -- check if storyline exists if it doesn't exist, create a new one
-    IF (SELECT * FROM storylines WHERE name = storyline_name) = NULL THEN
-        INSERT INTO storylines(storyline_name) VALUES (storyline_name);
+DELIMITER //
+CREATE PROCEDURE create_storyline(IN name VARCHAR(255))
+BEGIN
+    -- check if storyline exists; if it doesn't exist, create a new one
+    IF NOT EXISTS (SELECT * FROM storylines WHERE storyline_title = name) THEN
+        INSERT INTO storylines(storyline_title) VALUES (name);
     END IF;
 END //
-
 
 -- function to create a collectable if it doesn't already exist
 CREATE FUNCTION create_collectable(
     title VARCHAR(255),
+    publication_year VARCHAR(255),
     publisher VARCHAR(255),
-    storyline_id INT,
     issue_number INT
 )
 RETURNS INT DETERMINISTIC
 BEGIN
     DECLARE collectable_id INT;
-
     -- check if collectable exists
-    SELECT collectable_id INTO collectable_id FROM collectables WHERE title = title AND publisher = publisher AND storyline_id = storyline_id LIMIT 1;
+    SELECT collectable_id INTO collectable_id FROM collectables WHERE title = title AND publication_year = publication_year AND publisher = publisher
+     LIMIT 1;
 
     -- if it doesn't exist, create a new one
     IF collectable_id IS NULL THEN
         IF issue_number IS NULL THEN
-            INSERT INTO collectables(title, publisher, storyline_id) VALUES (title, publisher, storyline_id);
+            INSERT INTO collectables(title, publication_year ,publisher) VALUES (title, publication_year, publisher);
         ELSE
-            INSERT INTO collectables(title, publisher, storyline_id) VALUES (title, publisher, storyline_id);
+            INSERT INTO collectables(title, publication_year, publisher) VALUES (title, publication_year, publisher);
             SET collectable_id = LAST_INSERT_ID();
             INSERT INTO comics(collectable_id, issue_number) VALUES (collectable_id, issue_number);
         END IF;
@@ -769,6 +767,7 @@ END //
 -- main function to create a new stock item
 CREATE FUNCTION create_stock(
     title VARCHAR(255),
+    publication_year VARCHAR(255),
     condition_id DECIMAL(3,1),
     buying_price DECIMAL(10,2),
     selling_price DECIMAL(10,2),
@@ -781,20 +780,21 @@ CREATE FUNCTION create_stock(
 )
 RETURNS INT DETERMINISTIC
 BEGIN
-    DECLARE storyline_id INT;
     DECLARE collectable_id INT;
     DECLARE stock_id INT;
 
     -- create or retrieve storyline
-    SET storyline_id = create_storyline(storyline_name);
+    CALL create_storyline(storyline_name);
 
     -- create or retrieve collectable
-    SET collectable_id = create_collectable(title, publisher, storyline_id, issue_number);
+    SET collectable_id = create_collectable(title, publication_year, publisher, issue_number);
 
     -- create new stock item
     INSERT INTO stock(collectable_id, condition_id, buying_price, selling_price, format, in_stock)
     VALUES (collectable_id, condition_id, buying_price, selling_price, format, in_stock);
     SET stock_id = LAST_INSERT_ID();
+
+    INSERT INTO storyline_mappings(storyline_title, collectable_id) VALUES (storyline_name, collectable_id);
 
     -- add comment if given
     CALL create_comment(stock_id, comment_text);
@@ -805,7 +805,7 @@ END //
 DELIMITER ;
 
 
-SELECT create_stock('The Avengers (1999)', 8.5, 4.5, 19.99, 'paperback', True, NULL, 'The Infinity Gauntlet', 'Marvel', NULL);
+SELECT create_stock('The Avengers', "1999", 8.5, 4.5, 19.99, 'paperback', True, NULL, 'The Infinity Gauntlet', 'Marvel', NULL);
 
 
 DELIMITER //
@@ -888,11 +888,3 @@ BEGIN
 END //
 
 DELIMITER ;
-
-
-
-
-
-
-
-
