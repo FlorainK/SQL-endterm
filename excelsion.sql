@@ -742,9 +742,14 @@ BEGIN
         IF issue_number IS NULL THEN
             INSERT INTO collectables(title, publication_year ,publisher) VALUES (title, publication_year, publisher);
         ELSE
-            INSERT INTO collectables(title, publication_year, publisher) VALUES (title, publication_year, publisher);
-            SET collectable_id = LAST_INSERT_ID();
-            INSERT INTO comics(collectable_id, issue_number) VALUES (collectable_id, issue_number);
+            -- join comics and collectables, check if entry with all given parameters exist
+            IF EXISTS (SELECT * FROM comics c JOIN collectables cl ON c.collectable_id = cl.collectable_id WHERE cl.title = title AND cl.publication_year = publication_year AND cl.publisher = publisher AND c.issue_number = issue_number) THEN
+                SELECT collectable_id INTO collectable_id FROM comics c JOIN collectables cl ON c.collectable_id = cl.collectable_id WHERE cl.title = title AND cl.publication_year = publication_year AND cl.publisher = publisher AND c.issue_number = issue_number;
+            -- if not create new collectable and comic entry
+            ELSE
+                INSERT INTO collectables(title, publication_year, publisher) VALUES (title, publication_year, publisher);
+                SET collectable_id = LAST_INSERT_ID();
+                INSERT INTO comics(collectable_id, issue_number) VALUES (collectable_id, issue_number);
         END IF;
         SET collectable_id = LAST_INSERT_ID();
     END IF;
@@ -760,8 +765,8 @@ IN comment_text TEXT
 )
 BEGIN
 -- add comment if given
-IF comment_text IS NOT NULL THEN
-INSERT INTO comments(stock_id, comment) VALUES (stock_id, comment_text);
+IF comment_text IS NOT NULL AND IF NOT EXISTS (SELECT * FROM comments WHERE stock_id = stock_id)THEN
+    INSERT INTO comments(stock_id, comment) VALUES (stock_id, comment_text);
 END IF;
 END //
 
@@ -786,7 +791,9 @@ BEGIN
     DECLARE stock_id INT;
 
     -- create or retrieve storyline
-    CALL create_storyline(storyline_name);
+    IF storyline_name IS NOT NULL THEN
+        CALL create_storyline(storyline_name);
+    END IF;
 
     -- create or retrieve collectable
     SET collectable_id = create_collectable(title, publication_year, publisher, issue_number);
@@ -796,7 +803,10 @@ BEGIN
     VALUES (collectable_id, condition_id, buying_price, selling_price, format, in_stock);
     SET stock_id = LAST_INSERT_ID();
 
-    INSERT INTO storyline_mappings(storyline_title, collectable_id) VALUES (storyline_name, collectable_id);
+    IF storyline_name IS NOT NULL THEN
+        -- add storyline mapping
+        INSERT INTO storyline_mappings(storyline_title, collectable_id) VALUES (storyline_name, collectable_id);
+    END IF;
 
     -- add comment if given
     CALL create_comment(stock_id, comment_text);
