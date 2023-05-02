@@ -585,8 +585,11 @@ INSERT INTO sold_items(stock_id, customer_id) VALUES
     (5, 1),
     (6, 2),
     (15, 4),
-    (20, 4),
-    (21, 3);
+    (20, 4);
+
+INSERT INTO sold_items(stock_id, customer_id, sale_date) VALUES
+    (21, 5, "2022-01-01");
+
 
 
 
@@ -650,7 +653,7 @@ CREATE VIEW storyline_character_appearances AS
 
 
 CREATE VIEW sold_stock AS
-        SELECT cl.title,cl.publication_year, cm.issue_number ,st.condition_id, cd.textual_condition, st.buying_price, st.selling_price, c.comment, cst.first_name, cst.last_name, si.sale_date
+        SELECT cl.title,cl.publication_year, cm.issue_number ,st.condition_id, cd.textual_condition, st.buying_price, st.selling_price, c.comment, cst.first_name, cst.last_name, si.sale_date, st.stock_id
             FROM stock st
             JOIN collectables cl ON st.collectable_id = cl.collectable_id
             JOIN conditions cd ON st.condition_id = cd.condition_id
@@ -690,17 +693,27 @@ SELECT c.first_name, c.last_name, MAX(si.sale_date) AS last_purchase_date, DATED
     FROM customers c
     JOIN sold_items si ON c.customer_id = si.customer_id
     GROUP BY c.customer_id
-    HAVING days_since_last_purchase >= 0;
+    HAVING days_since_last_purchase >= 3;
 
--- sales count and total amount per storyline
-SELECT s.storyline_title, COUNT(*) AS sales_count, SUM(st.selling_price) AS total_amount
-    FROM storylines s
-    JOIN storyline_mappings sm ON s.storyline_title = sm.storyline_title
-    JOIN collectables c ON sm.collectable_id = c.collectable_id
-    JOIN stock st ON c.collectable_id = st.collectable_id
-    JOIN sold_items si ON st.stock_id = si.stock_id
-    GROUP BY s.storyline_title
-    ORDER BY total_amount DESC;
+-- sales count and profit per unit
+
+SELECT ic.title, ic.publication_year, ic.inventory_count, sc.sales_count, sc.profit_per_unit
+    FROM(
+        SELECT cl.title,cl.publication_year, COUNT(*) AS inventory_count
+            FROM stock s
+            JOIN collectables cl ON s.collectable_id = cl.collectable_id
+            JOIN conditions cd ON s.condition_id = cd.condition_id
+            LEFT JOIN comics cm ON cl.collectable_id = cm.collectable_id
+            LEFT JOIN comments c ON s.stock_id = c.stock_id
+            GROUP BY cl.title, cl.publication_year
+
+    ) AS ic
+    LEFT JOIN(
+        SELECT ss.title, ss.publication_year, COUNT(*) AS sales_count, ROUND((SUM(ss.selling_price) - SUM(ss.buying_price)) / COUNT(*), 2) AS profit_per_unit
+            FROM sold_stock ss
+            GROUP BY title, publication_year
+    ) AS sc ON ic.title = sc.title AND ic.publication_year = sc.publication_year
+    ORDER BY sc.sales_count DESC;
 
 -- view with wishlist counts
 SELECT st.stock_id, cl.title,cl.publication_year, cm.issue_number, st.buying_price, st.selling_price, st.format, st.in_stock, COUNT(*) AS wishlist_count
@@ -710,10 +723,11 @@ SELECT st.stock_id, cl.title,cl.publication_year, cm.issue_number, st.buying_pri
     LEFT JOIN comics cm ON cl.collectable_id = cm.collectable_id
     GROUP BY st.stock_id, cm.issue_number, cl.title, st.buying_price, st.selling_price, st.format, st.in_stock
     ORDER BY wishlist_count DESC;
+
+
 -- from here on some functions
 
 -- function to create a storyline if it doesn't already exist
-
 DELIMITER //
 CREATE PROCEDURE create_storyline(IN name VARCHAR(255))
 BEGIN
@@ -750,6 +764,7 @@ BEGIN
                 INSERT INTO collectables(title, publication_year, publisher) VALUES (title, publication_year, publisher);
                 SET collectable_id = LAST_INSERT_ID();
                 INSERT INTO comics(collectable_id, issue_number) VALUES (collectable_id, issue_number);
+			END IF;
         END IF;
         SET collectable_id = LAST_INSERT_ID();
     END IF;
@@ -765,7 +780,7 @@ IN comment_text TEXT
 )
 BEGIN
 -- add comment if given
-IF comment_text IS NOT NULL AND IF NOT EXISTS (SELECT * FROM comments WHERE stock_id = stock_id)THEN
+IF comment_text IS NOT NULL AND NOT EXISTS (SELECT * FROM comments WHERE stock_id = stock_id)THEN
     INSERT INTO comments(stock_id, comment) VALUES (stock_id, comment_text);
 END IF;
 END //
@@ -803,7 +818,7 @@ BEGIN
     VALUES (collectable_id, condition_id, buying_price, selling_price, format, in_stock);
     SET stock_id = LAST_INSERT_ID();
 
-    IF storyline_name IS NOT NULL THEN
+    IF storyline_name IS NOT NULL AND NOT EXISTS (SELECT * FROM storyline_mappings WHERE storyline_title = storyline_title AND collectable_id = collectable_id) THEN
         -- add storyline mapping
         INSERT INTO storyline_mappings(storyline_title, collectable_id) VALUES (storyline_name, collectable_id);
     END IF;
@@ -821,7 +836,7 @@ SELECT create_stock('The Avengers', "1999", 8.5, 4.5, 19.99, 'paperback', True, 
 
 
 DELIMITER //
-CREATE PROCEDURE create_discount(IN discount DECIMAL(5,2), IN stock_id INT)
+CREATE PROCEDURE create_discount(IN discount     INT, IN stock_id INT)
 BEGIN
     IF stock_id IS NULL THEN
         UPDATE stock SET selling_price = selling_price * (1 - discount / 100) WHERE in_stock IS TRUE;
@@ -831,7 +846,7 @@ BEGIN
 END //
 DELIMITER ;
 
-CALL create_discount(10, NULL);
+-- CALL create_discount(10, NULL);
 
 DELIMITER //
 CREATE PROCEDURE revert_discount(IN discount INT, IN stock_id INT)
@@ -843,12 +858,16 @@ BEGIN
     IF stock_id IS NULL THEN
         UPDATE stock SET selling_price = selling_price / discount_factor WHERE in_stock IS True;
     ELSE
+        IF (SELECT COUNT(*) FROM stock WHERE stock_id = stock_id) = 0 THEN
+            SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Stock item does not exist or is not in stock';
+        ELSE
         UPDATE stock SET selling_price = selling_price / discount_factor WHERE stock_id = stock_id AND in_stock IS True;
+        END IF;
     END IF;
 END //
 DELIMITER ;
 
-CALL revert_discount(10, NULL);
+-- CALL revert_discount(10, NULL);
 
 
 
@@ -866,10 +885,9 @@ BEGIN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Stock item does not exist or is not in stock';
     END IF;
 
-    UPDATE stock SET in_stock = False WHERE stock_id = st_id;
     INSERT INTO sold_items (customer_id, stock_id) VALUES (cs_id, st_id);
+    UPDATE stock SET in_stock = False WHERE stock_id = st_id;
 
-    DELETE FROM shopping_cart WHERE stock_id = st_id;
 END //
 DELIMITER ;
 
@@ -887,7 +905,7 @@ BEGIN
     SELECT NEW.stock_id, NEW.customer_id INTO sold_stock_id, sold_customer_id;
 
     -- set the corresponding stock item's in_stock column to false
-    UPDATE stock SET in_stock = FALSE WHERE stock_id = sold_stock_id;
+    UPDATE stock SET in_stock = False WHERE stock_id = sold_stock_id;
 
     -- delete the item from all shopping carts
     DELETE FROM shopping_cart WHERE stock_id = sold_stock_id;
